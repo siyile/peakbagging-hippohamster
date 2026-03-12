@@ -28,7 +28,6 @@ export default function EditPostForm({ post }: { post: Post }) {
   const [gpxUrl, setGpxUrl] = useState(post.gpxUrl || "");
   const [peakbaggerUrl, setPeakbaggerUrl] = useState(post.peakbaggerUrl || "");
   const [nwsUrl, setNwsUrl] = useState(post.nwsUrl || "");
-  const [caltopoUrl, setCaltopoUrl] = useState(post.caltopoUrl || "");
   const [saving, setSaving] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingGpx, setUploadingGpx] = useState(false);
@@ -77,7 +76,7 @@ export default function EditPostForm({ post }: { post: Post }) {
         gpxUrl: gpxUrl || undefined,
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
-        caltopoUrl: caltopoUrl || undefined,
+
         tags: tags
           .split(",")
           .map((t) => t.trim())
@@ -228,16 +227,6 @@ export default function EditPostForm({ post }: { post: Post }) {
             placeholder="https://forecast.weather.gov/..."
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="caltopoUrl">CalTopo Link</Label>
-        <Input
-          id="caltopoUrl"
-          value={caltopoUrl}
-          onChange={(e) => setCaltopoUrl(e.target.value)}
-          placeholder="https://caltopo.com/m/..."
-        />
       </div>
 
       <div className="space-y-2">

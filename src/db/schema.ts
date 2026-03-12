@@ -19,7 +19,6 @@ export const posts = pgTable("posts", {
   gpxUrl: varchar("gpx_url", { length: 500 }),
   peakbaggerUrl: varchar("peakbagger_url", { length: 500 }),
   nwsUrl: varchar("nws_url", { length: 500 }),
-  caltopoUrl: varchar("caltopo_url", { length: 500 }),
   tags: text("tags").array().default([]),
   viewCount: integer("view_count").default(0).notNull(),
   status: varchar("status", { length: 20 }).default("draft").notNull(),

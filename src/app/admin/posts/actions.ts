@@ -24,7 +24,7 @@ export async function createPost(formData: {
   gpxUrl?: string;
   peakbaggerUrl?: string;
   nwsUrl?: string;
-  caltopoUrl?: string;
+
   tags?: string[];
   status?: string;
 }) {
@@ -44,7 +44,7 @@ export async function createPost(formData: {
       gpxUrl: formData.gpxUrl || null,
       peakbaggerUrl: formData.peakbaggerUrl || null,
       nwsUrl: formData.nwsUrl || null,
-      caltopoUrl: formData.caltopoUrl || null,
+
       tags: formData.tags || [],
       status: formData.status || "draft",
       publishedAt: isPublished ? new Date() : null,
@@ -67,7 +67,7 @@ export async function updatePost(
     gpxUrl?: string;
     peakbaggerUrl?: string;
     nwsUrl?: string;
-    caltopoUrl?: string;
+  
     tags?: string[];
     status?: string;
   }
@@ -94,7 +94,7 @@ export async function updatePost(
       gpxUrl: formData.gpxUrl || null,
       peakbaggerUrl: formData.peakbaggerUrl || null,
       nwsUrl: formData.nwsUrl || null,
-      caltopoUrl: formData.caltopoUrl || null,
+
       tags: formData.tags || [],
       status: formData.status || "draft",
       publishedAt: isPublished && !existing?.publishedAt ? new Date() : existing?.publishedAt,

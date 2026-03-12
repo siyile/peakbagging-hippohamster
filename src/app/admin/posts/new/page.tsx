@@ -22,7 +22,6 @@ export default function NewPostPage() {
   const [gpxUrl, setGpxUrl] = useState("");
   const [peakbaggerUrl, setPeakbaggerUrl] = useState("");
   const [nwsUrl, setNwsUrl] = useState("");
-  const [caltopoUrl, setCaltopoUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingGpx, setUploadingGpx] = useState(false);
@@ -71,7 +70,7 @@ export default function NewPostPage() {
         gpxUrl: gpxUrl || undefined,
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
-        caltopoUrl: caltopoUrl || undefined,
+
         tags: tags
           .split(",")
           .map((t) => t.trim())
@@ -214,16 +213,6 @@ export default function NewPostPage() {
             placeholder="https://forecast.weather.gov/..."
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="caltopoUrl">CalTopo Link</Label>
-        <Input
-          id="caltopoUrl"
-          value={caltopoUrl}
-          onChange={(e) => setCaltopoUrl(e.target.value)}
-          placeholder="https://caltopo.com/m/..."
-        />
       </div>
 
       <div className="space-y-2">

@@ -116,15 +116,6 @@ export default async function PostPage({
         className="prose dark:prose-invert max-w-none px-6 py-6"
         dangerouslySetInnerHTML={{ __html: html }}
       />
-      {post.caltopoUrl && (
-        <div className="px-6 py-3">
-          <iframe
-            src={post.caltopoUrl}
-            className="w-full h-[500px] rounded-lg border"
-            frameBorder="0"
-          />
-        </div>
-      )}
     </article>
   );
 }
