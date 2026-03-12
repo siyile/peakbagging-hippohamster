@@ -1,0 +1,235 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { createPost } from "../actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { uploadImage } from "@/components/editor/image-upload";
+import type { Editor as TiptapEditor } from "@tiptap/react";
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(() => import("@/components/editor/editor"), {
+  ssr: false,
+});
+
+export default function NewPostPage() {
+  const [title, setTitle] = useState("");
+  const [description, setExcerpt] = useState("");
+  const [tags, setTags] = useState("");
+  const [coverImage, setCoverImage] = useState("");
+  const [tripDate, setTripDate] = useState("");
+  const [gpxUrl, setGpxUrl] = useState("");
+  const [peakbaggerUrl, setPeakbaggerUrl] = useState("");
+  const [nwsUrl, setNwsUrl] = useState("");
+  const [caltopoUrl, setCaltopoUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingGpx, setUploadingGpx] = useState(false);
+  const editorRef = useRef<TiptapEditor | null>(null);
+
+  async function handleGpxUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".gpx")) {
+      alert("Please upload a .gpx file");
+      e.target.value = "";
+      return;
+    }
+    setUploadingGpx(true);
+    try {
+      const url = await uploadImage(file);
+      setGpxUrl(url);
+    } finally {
+      setUploadingGpx(false);
+    }
+  }
+
+  async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    try {
+      const url = await uploadImage(file);
+      setCoverImage(url);
+    } finally {
+      setUploadingCover(false);
+    }
+  }
+
+  async function handleSave(status: string) {
+    const content = editorRef.current?.getJSON();
+    if (!title || !content) return;
+    setSaving(true);
+    try {
+      await createPost({
+        title,
+        content: JSON.stringify(content),
+        description: description || undefined,
+        coverImage: coverImage || undefined,
+        tripDate: tripDate || undefined,
+        gpxUrl: gpxUrl || undefined,
+        peakbaggerUrl: peakbaggerUrl || undefined,
+        nwsUrl: nwsUrl || undefined,
+        caltopoUrl: caltopoUrl || undefined,
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+        status,
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">New Post</h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => handleSave("draft")}
+            disabled={saving}
+          >
+            Save Draft
+          </Button>
+          <Button onClick={() => handleSave("published")} disabled={saving}>
+            Publish
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Post title"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Excerpt</Label>
+        <Input
+          id="description"
+          value={description}
+          onChange={(e) => setExcerpt(e.target.value)}
+          placeholder="Short description for previews"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="cover">Cover Image</Label>
+        {coverImage && (
+          <div className="relative">
+            <img
+              src={coverImage}
+              alt="Cover preview"
+              className="h-48 w-full rounded-md border object-cover"
+            />
+            <Button
+              variant="destructive"
+              size="sm"
+              className="absolute top-2 right-2"
+              onClick={() => setCoverImage("")}
+            >
+              Remove
+            </Button>
+          </div>
+        )}
+        <Input
+          id="cover"
+          type="file"
+          accept="image/*"
+          onChange={handleCoverUpload}
+          disabled={uploadingCover}
+        />
+        {uploadingCover && (
+          <p className="text-sm text-muted-foreground">Uploading...</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="tags">Tags (comma-separated)</Label>
+          <Input
+            id="tags"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="tech, tutorial, life"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tripDate">Trip Date</Label>
+          <Input
+            id="tripDate"
+            type="date"
+            value={tripDate}
+            onChange={(e) => setTripDate(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="gpx">GPX Track</Label>
+        {gpxUrl && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground truncate flex-1">{gpxUrl}</span>
+            <Button variant="destructive" size="sm" onClick={() => setGpxUrl("")}>
+              Remove
+            </Button>
+          </div>
+        )}
+        <Input
+          id="gpx"
+          type="file"
+          accept=".gpx"
+          onChange={handleGpxUpload}
+          disabled={uploadingGpx}
+        />
+        {uploadingGpx && (
+          <p className="text-sm text-muted-foreground">Uploading...</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="peakbaggerUrl">Peakbagger URL</Label>
+          <Input
+            id="peakbaggerUrl"
+            value={peakbaggerUrl}
+            onChange={(e) => setPeakbaggerUrl(e.target.value)}
+            placeholder="https://peakbagger.com/..."
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="nwsUrl">National Weather Service URL</Label>
+          <Input
+            id="nwsUrl"
+            value={nwsUrl}
+            onChange={(e) => setNwsUrl(e.target.value)}
+            placeholder="https://forecast.weather.gov/..."
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="caltopoUrl">CalTopo Link</Label>
+        <Input
+          id="caltopoUrl"
+          value={caltopoUrl}
+          onChange={(e) => setCaltopoUrl(e.target.value)}
+          placeholder="https://caltopo.com/m/..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Content</Label>
+        <Editor editorRef={editorRef} />
+      </div>
+    </div>
+  );
+}
