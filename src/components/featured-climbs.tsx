@@ -33,11 +33,11 @@ export async function FeaturedClimbs({
 
   return (
     <aside className={className}>
-      <h2 className="text-3xl font-bold text-[#888888]">Featured Climbs</h2>
+      <h2 className="text-3xl font-bold text-brand-grey">Featured Climbs</h2>
       <div className="mt-4 space-y-8">
         {featured.map((fp) => (
           <Link key={fp.slug} href={`/posts/${fp.slug}`} className="block group">
-            <h3 className="font-semibold text-[#0078A0] transition-colors line-clamp-1">
+            <h3 className="font-semibold text-brand transition-colors line-clamp-1">
               {fp.title}
             </h3>
             {fp.description && (

@@ -90,7 +90,7 @@ export default async function PostPage({
         )}
       </header>
       {(post.gpxUrl || post.caltopoUrl || post.peakbaggerUrl || post.nwsUrl) && (
-        <div className="flex items-center gap-3 px-6 py-3 text-lg text-[#0078A0]">
+        <div className="flex items-center gap-3 px-6 py-3 text-lg text-brand">
           {[
             post.gpxUrl && (
               <a key="gpx" href={post.gpxUrl} download className="hover:opacity-70 transition-opacity">

@@ -13,7 +13,7 @@ export function Sidebar() {
     <aside className="sticky top-8 self-start">
       <Link href="/" className="flex items-center gap-2">
         <Image src="/logo.png" alt="Hippo Hamster" width={72} height={72} />
-        <span className="text-2xl font-bold text-[#0078A0]">
+        <span className="text-2xl font-bold text-brand">
           Hippo
           <br />
           Hamster
@@ -41,7 +41,7 @@ export function Sidebar() {
             <Link
               key={link.label}
               href={link.href}
-              className="text-[#0078A0] hover:underline font-medium"
+              className="text-brand hover:underline font-medium"
             >
               {link.label}
             </Link>
