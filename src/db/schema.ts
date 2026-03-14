@@ -17,6 +17,7 @@ export const posts = pgTable("posts", {
   coverImage: varchar("cover_image", { length: 500 }),
   tripDate: timestamp("trip_date"),
   gpxUrl: varchar("gpx_url", { length: 500 }),
+  caltopoUrl: varchar("caltopo_url", { length: 500 }),
   peakbaggerUrl: varchar("peakbagger_url", { length: 500 }),
   nwsUrl: varchar("nws_url", { length: 500 }),
   tags: text("tags").array().default([]),

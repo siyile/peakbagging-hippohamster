@@ -8,6 +8,7 @@ import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { FigureImage } from "@/lib/figure-image";
 import TiptapLink from "@tiptap/extension-link";
+import { FeaturedClimbs } from "@/components/featured-climbs";
 
 export default async function PostPage({
   params,
@@ -38,6 +39,7 @@ export default async function PostPage({
   ]);
 
   return (
+    <div className="grid grid-cols-[1fr_var(--featured-w,280px)] gap-8">
     <article>
       {post.coverImage && (
         <img
@@ -87,12 +89,17 @@ export default async function PostPage({
           </div>
         )}
       </header>
-      {(post.gpxUrl || post.peakbaggerUrl || post.nwsUrl) && (
+      {(post.gpxUrl || post.caltopoUrl || post.peakbaggerUrl || post.nwsUrl) && (
         <div className="flex items-center gap-3 px-6 py-3 text-lg text-[#0078A0]">
           {[
             post.gpxUrl && (
               <a key="gpx" href={post.gpxUrl} download className="hover:opacity-70 transition-opacity">
                 Download GPX Track
+              </a>
+            ),
+            post.caltopoUrl && (
+              <a key="caltopo" href={post.caltopoUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
+                CalTopo Map
               </a>
             ),
             post.peakbaggerUrl && (
@@ -113,9 +120,12 @@ export default async function PostPage({
         </div>
       )}
       <div
-        className="prose dark:prose-invert max-w-none px-6 py-6"
+        className="prose dark:prose-invert max-w-none px-6 py-6 text-black dark:text-white"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </article>
+
+    <FeaturedClimbs excludeId={post.id} className="pt-6" />
+    </div>
   );
 }

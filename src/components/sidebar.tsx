@@ -11,9 +11,9 @@ const climbLinks = [
 export function Sidebar() {
   return (
     <aside className="sticky top-8 self-start">
-      <Link href="/" className="flex items-center gap-3">
-        <Image src="/logo.png" alt="Hippo Hamster" width={108} height={108} />
-        <span className="text-4xl font-bold text-[#0078A0]">
+      <Link href="/" className="flex items-center gap-2">
+        <Image src="/logo.png" alt="Hippo Hamster" width={72} height={72} />
+        <span className="text-2xl font-bold text-[#0078A0]">
           Hippo
           <br />
           Hamster

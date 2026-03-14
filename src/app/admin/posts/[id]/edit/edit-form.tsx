@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { uploadImage } from "@/components/editor/image-upload";
 import type { Post } from "@/db/schema";
 import type { Editor as TiptapEditor, JSONContent } from "@tiptap/react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
 const Editor = dynamic(() => import("@/components/editor/editor"), {
@@ -26,8 +27,10 @@ export default function EditPostForm({ post }: { post: Post }) {
   const [coverImage, setCoverImage] = useState(post.coverImage || "");
   const [tripDate, setTripDate] = useState(formatDate(post.tripDate));
   const [gpxUrl, setGpxUrl] = useState(post.gpxUrl || "");
+  const [caltopoUrl, setCaltopoUrl] = useState(post.caltopoUrl || "");
   const [peakbaggerUrl, setPeakbaggerUrl] = useState(post.peakbaggerUrl || "");
   const [nwsUrl, setNwsUrl] = useState(post.nwsUrl || "");
+  const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingGpx, setUploadingGpx] = useState(false);
@@ -74,6 +77,7 @@ export default function EditPostForm({ post }: { post: Post }) {
         coverImage: coverImage || undefined,
         tripDate: tripDate || undefined,
         gpxUrl: gpxUrl || undefined,
+        caltopoUrl: caltopoUrl || undefined,
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
 
@@ -98,6 +102,15 @@ export default function EditPostForm({ post }: { post: Post }) {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Edit Post</h1>
         <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              if (confirm("Discard unsaved changes?")) router.push("/admin/posts");
+            }}
+          >
+            Back
+          </Button>
           <Button variant="destructive" size="sm" onClick={handleDelete}>
             Delete
           </Button>
@@ -208,7 +221,16 @@ export default function EditPostForm({ post }: { post: Post }) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="caltopoUrl">CalTopo Map URL</Label>
+          <Input
+            id="caltopoUrl"
+            value={caltopoUrl}
+            onChange={(e) => setCaltopoUrl(e.target.value)}
+            placeholder="https://caltopo.com/m/..."
+          />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="peakbaggerUrl">Peakbagger URL</Label>
           <Input

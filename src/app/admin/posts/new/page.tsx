@@ -20,6 +20,7 @@ export default function NewPostPage() {
   const [coverImage, setCoverImage] = useState("");
   const [tripDate, setTripDate] = useState("");
   const [gpxUrl, setGpxUrl] = useState("");
+  const [caltopoUrl, setCaltopoUrl] = useState("");
   const [peakbaggerUrl, setPeakbaggerUrl] = useState("");
   const [nwsUrl, setNwsUrl] = useState("");
   const [saving, setSaving] = useState(false);
@@ -68,6 +69,7 @@ export default function NewPostPage() {
         coverImage: coverImage || undefined,
         tripDate: tripDate || undefined,
         gpxUrl: gpxUrl || undefined,
+        caltopoUrl: caltopoUrl || undefined,
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
 
@@ -194,7 +196,16 @@ export default function NewPostPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="caltopoUrl">CalTopo Map URL</Label>
+          <Input
+            id="caltopoUrl"
+            value={caltopoUrl}
+            onChange={(e) => setCaltopoUrl(e.target.value)}
+            placeholder="https://caltopo.com/m/..."
+          />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="peakbaggerUrl">Peakbagger URL</Label>
           <Input
