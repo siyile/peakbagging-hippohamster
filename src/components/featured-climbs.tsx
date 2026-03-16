@@ -34,10 +34,10 @@ export async function FeaturedClimbs({
   return (
     <aside className={className}>
       <h2 className="text-3xl font-bold text-brand-grey">Featured Climbs</h2>
-      <div className="mt-4 space-y-8">
+      <div className="mt-4 space-y-4 md:space-y-8 pb-6">
         {featured.map((fp) => (
           <Link key={fp.slug} href={`/posts/${fp.slug}`} className="block group">
-            <h3 className="font-semibold text-brand transition-colors line-clamp-1">
+            <h3 className="text-lg font-semibold text-brand transition-colors line-clamp-1">
               {fp.title}
             </h3>
             {fp.description && (
@@ -49,7 +49,7 @@ export async function FeaturedClimbs({
               <img
                 src={fp.coverImage}
                 alt={fp.title}
-                className="mt-2 w-full aspect-[2/1] object-cover rounded-md"
+                className="w-full aspect-[2/1] object-cover rounded-md"
               />
             )}
           </Link>

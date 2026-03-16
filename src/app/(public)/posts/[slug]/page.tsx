@@ -39,18 +39,20 @@ export default async function PostPage({
   ]);
 
   return (
-    <div className="grid grid-cols-[1fr_var(--featured-w,280px)] gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-[1fr_var(--featured-w,280px)] gap-0 md:gap-8">
     <article>
       {post.coverImage && (
         <img
           src={post.coverImage}
           alt={post.title}
-          className="w-full max-h-[480px] object-cover rounded-xl"
+          loading="eager"
+          fetchPriority="high"
+          className="w-full max-h-[480px] object-cover rounded-none md:rounded-xl mb-2 md:mb-0"
         />
       )}
-      <header className="border-b px-6 pt-6 pb-6">
+      <header className="border-b px-4 pt-2 pb-2 md:px-6 md:pt-6 md:pb-6">
         {post.tags && post.tags.length > 0 && (
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-1 md:mb-3 flex items-center gap-2">
             {post.tags.map((tag, i) => {
               const colors = [
                 "bg-red-900 hover:bg-red-800 dark:bg-red-950 dark:hover:bg-red-900",
@@ -71,12 +73,12 @@ export default async function PostPage({
             })}
           </div>
         )}
-        <h1 className="text-3xl font-bold">{post.title}</h1>
+        <h1 className="text-3xl font-bold my-1">{post.title}</h1>
         {post.description && (
-          <p className="mt-1 text-muted-foreground text-xl">{post.description}</p>
+          <p className="mt-0.5 text-muted-foreground text-base md:text-xl">{post.description}</p>
         )}
         {post.tripDate && (
-          <div className="mt-3 flex items-center gap-1.5 text-muted-foreground">
+          <div className="mt-1 md:mt-3 flex items-center gap-1.5 text-sm md:text-base text-muted-foreground">
             <time>
               {new Date(post.tripDate).toLocaleDateString("en-US", {
                 month: "long",
@@ -90,7 +92,7 @@ export default async function PostPage({
         )}
       </header>
       {(post.gpxUrl || post.caltopoUrl || post.peakbaggerUrl || post.nwsUrl) && (
-        <div className="flex items-center gap-3 px-6 py-3 text-lg text-brand">
+        <div className="grid grid-cols-2 md:flex md:items-center gap-3 px-4 py-2 md:px-6 md:py-3 text-sm md:text-lg text-brand">
           {[
             post.gpxUrl && (
               <a key="gpx" href={post.gpxUrl} download className="hover:opacity-70 transition-opacity">
@@ -115,17 +117,17 @@ export default async function PostPage({
           ]
             .filter(Boolean)
             .flatMap((link, i, arr) =>
-              i < arr.length - 1 ? [link, <span key={`dot-${i}`}>·</span>] : [link]
+              i < arr.length - 1 ? [link, <span key={`dot-${i}`} className="hidden md:inline">·</span>] : [link]
             )}
         </div>
       )}
       <div
-        className="prose dark:prose-invert max-w-none px-6 py-6 text-black dark:text-white"
+        className="prose dark:prose-invert max-w-none px-4 pt-0 pb-0 md:px-6 md:pt-6 text-black dark:text-white"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </article>
 
-    <FeaturedClimbs excludeId={post.id} className="pt-6" />
+    <FeaturedClimbs excludeId={post.id} className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-6" />
     </div>
   );
 }

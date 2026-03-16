@@ -37,17 +37,18 @@ export default async function HomePage() {
         title: posts.title,
         slug: posts.slug,
         description: posts.description,
+        coverImage: posts.coverImage,
       })
       .from(posts)
       .where(eq(posts.status, "published"))
       .orderBy(desc(posts.publishedAt))
-      .limit(3),
+      .limit(5),
   ]);
 
   return (
     <div>
-      {/* Hero Banner — breaks out of container to go full-width */}
-      <div className="relative -mt-8 left-1/2 -translate-x-1/2 w-screen overflow-hidden">
+      {/* Hero Banner — hidden on mobile */}
+      <div className="hidden md:block relative -mt-8 left-1/2 -translate-x-1/2 w-screen overflow-hidden">
         <img
           src="/home_cover.jpeg"
           alt="Mountain landscape"
@@ -70,8 +71,8 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Navigation Bar */}
-      <nav className="flex items-center justify-center gap-8 py-4">
+      {/* Navigation Bar — hidden on mobile */}
+      <nav className="hidden md:flex items-center justify-center gap-8 py-4">
         {navLinks.map((link) => (
           <Link
             key={link.label}
@@ -83,8 +84,8 @@ export default async function HomePage() {
         ))}
       </nav>
 
-      {/* Featured Climbs + Recent Posts side by side */}
-      <div className="grid grid-cols-[2fr_auto_1fr] gap-8 mt-4">
+      {/* Desktop: Featured Climbs + Recent Posts side by side */}
+      <div className="hidden md:grid grid-cols-[2fr_auto_1fr] gap-8 mt-4">
         {/* Featured Climbs */}
         <div className="pl-12">
           <h2 className="text-[50px] font-semibold text-brand-grey">Featured Climbs</h2>
@@ -172,6 +173,68 @@ export default async function HomePage() {
               </Link>
             ))}
           </nav>
+        </div>
+      </div>
+
+      {/* Mobile layout */}
+      <div className="md:hidden px-4 space-y-3">
+        {/* Featured Climbs */}
+        <div>
+          <h2 className="text-3xl font-semibold text-brand-grey mt-2">Featured Climbs</h2>
+          <div className="mt-3 space-y-4">
+            {featuredClimbs.map((fp) => (
+              <Link key={fp.slug} href={`/posts/${fp.slug}`} className="block group">
+                {fp.coverImage && (
+                  <img
+                    src={fp.coverImage}
+                    alt={fp.title}
+                    className="w-full aspect-[2/1] object-cover rounded-md"
+                  />
+                )}
+                <h3 className="text-xl font-semibold text-brand mt-1">{fp.title}</h3>
+                {fp.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{fp.description}</p>
+                )}
+              </Link>
+            ))}
+          </div>
+          <Link
+            href="/featured"
+            className="mt-4 inline-block text-brand font-medium underline"
+          >
+            More Featured Climbs &gt;
+          </Link>
+        </div>
+
+        {/* Divider */}
+        <div className="-mx-4 border-t border-gray-300" />
+
+        {/* Recent Posts */}
+        <div>
+          <h2 className="text-3xl font-semibold text-brand-grey">Recent Posts</h2>
+          <div className="mt-3 space-y-4">
+            {recentPosts.map((post) => (
+              <Link key={post.slug} href={`/posts/${post.slug}`} className="block group">
+                {post.coverImage && (
+                  <img
+                    src={post.coverImage}
+                    alt={post.title}
+                    className="w-full aspect-[2/1] object-cover rounded-md"
+                  />
+                )}
+                <h3 className="text-xl font-semibold text-brand mt-1">{post.title}</h3>
+                {post.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{post.description}</p>
+                )}
+              </Link>
+            ))}
+          </div>
+          <Link
+            href="/recent"
+            className="mt-4 mb-4 inline-block text-brand font-medium underline"
+          >
+            More Recent Posts &gt;
+          </Link>
         </div>
       </div>
     </div>

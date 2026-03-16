@@ -1,3 +1,5 @@
+import { MobileMenu } from "@/components/mobile-menu";
+
 export default function PublicLayout({
   children,
 }: {
@@ -5,7 +7,8 @@ export default function PublicLayout({
 }) {
   return (
     <div className="overflow-x-hidden">
-    <div className="mx-auto min-h-screen max-w-[1400px] px-6 py-8">
+    <MobileMenu />
+    <div className="mx-auto min-h-screen max-w-[1400px] px-0 py-0 md:px-6 md:py-8">
       <main>{children}</main>
     </div>
     </div>

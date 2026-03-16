@@ -6,8 +6,10 @@ export default function PostsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[var(--sidebar-w,240px)_1fr] gap-8 [--sidebar-w:180px] [--featured-w:280px]">
-      <Sidebar />
+    <div className="grid grid-cols-1 md:grid-cols-[var(--sidebar-w,240px)_1fr] gap-8 [--sidebar-w:180px] [--featured-w:280px]">
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
       <div>{children}</div>
     </div>
   );
