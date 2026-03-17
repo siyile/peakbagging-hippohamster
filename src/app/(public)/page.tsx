@@ -3,19 +3,13 @@ import { posts } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
+import { LOCATION_TAGS } from "@/lib/constants";
 
 const navLinks = [
   { label: "About Us", href: "#" },
   { label: "Glacier Climb", href: "/tags/Glacier Climb" },
   { label: "Alpine Rock", href: "/tags/Alpine Rock" },
   { label: "Scramble", href: "/tags/Scramble" },
-];
-
-const locationLinks = [
-  { label: "North Cascades", href: "#" },
-  { label: "South Cascades", href: "#" },
-  { label: "Mount Rainier", href: "#" },
-  { label: "Alpine Lakes Wilderness", href: "#" },
 ];
 
 export default async function HomePage() {
@@ -82,6 +76,24 @@ export default async function HomePage() {
             {link.label}
           </Link>
         ))}
+        <div className="relative group">
+          <button className="text-foreground hover:text-brand font-medium cursor-pointer">
+            Climbs by Location ▾
+          </button>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1 hidden group-hover:block z-50">
+            <div className="bg-white shadow-lg rounded-md py-2 min-w-[240px] border">
+              {LOCATION_TAGS.map((loc) => (
+                <Link
+                  key={loc}
+                  href={`/tags/${loc}`}
+                  className="block px-4 py-2 text-foreground hover:text-brand hover:bg-gray-50"
+                >
+                  {loc}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
       </nav>
 
       {/* Desktop: Featured Climbs + Recent Posts side by side */}
@@ -158,21 +170,6 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* Climbs by Location */}
-          <h2 className="text-2xl font-bold text-brand-grey mt-8">
-            Climbs by Location
-          </h2>
-          <nav className="mt-3 flex flex-col gap-2">
-            {locationLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-brand hover:underline font-medium ml-1"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
         </div>
       </div>
 

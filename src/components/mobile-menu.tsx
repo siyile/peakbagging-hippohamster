@@ -3,13 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
-const climbLinks = [
-  { label: "North Cascades", href: "#" },
-  { label: "South Cascades", href: "#" },
-  { label: "Mount Rainier", href: "#" },
-  { label: "Alpine Lakes Wilderness", href: "#" },
-];
+import { LOCATION_TAGS } from "@/lib/constants";
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -66,14 +60,14 @@ export function MobileMenu() {
             <div className="border-t px-4 py-3">
               <h3 className="text-lg font-medium text-muted-foreground">Climbs</h3>
             </div>
-            {climbLinks.map((link) => (
+            {LOCATION_TAGS.map((loc) => (
               <Link
-                key={link.label}
-                href={link.href}
+                key={loc}
+                href={`/tags/${loc}`}
                 onClick={() => setOpen(false)}
                 className="w-full border-t px-6 py-3 text-lg font-medium text-brand hover:bg-muted"
               >
-                {link.label}
+                {loc}
               </Link>
             ))}
           </nav>

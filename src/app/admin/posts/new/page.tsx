@@ -5,7 +5,15 @@ import { createPost } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { uploadImage } from "@/components/editor/image-upload";
+import { LOCATION_TAGS } from "@/lib/constants";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 import dynamic from "next/dynamic";
 
@@ -17,6 +25,7 @@ export default function NewPostPage() {
   const [title, setTitle] = useState("");
   const [description, setExcerpt] = useState("");
   const [tags, setTags] = useState("");
+  const [location, setLocation] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [tripDate, setTripDate] = useState("");
   const [gpxUrl, setGpxUrl] = useState("");
@@ -73,10 +82,10 @@ export default function NewPostPage() {
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
 
-        tags: tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
+        tags: [
+          ...tags.split(",").map((t) => t.trim()).filter(Boolean),
+          ...(location ? [location] : []),
+        ],
         status,
       });
     } finally {
@@ -153,15 +162,30 @@ export default function NewPostPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="tags">Tags (comma-separated)</Label>
           <Input
             id="tags"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
-            placeholder="tech, tutorial, life"
+            placeholder="Glacier Climb, Scramble"
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="location">Location</Label>
+          <Select value={location} onValueChange={setLocation}>
+            <SelectTrigger id="location">
+              <SelectValue placeholder="Select location" />
+            </SelectTrigger>
+            <SelectContent>
+              {LOCATION_TAGS.map((loc) => (
+                <SelectItem key={loc} value={loc}>
+                  {loc}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="tripDate">Trip Date</Label>

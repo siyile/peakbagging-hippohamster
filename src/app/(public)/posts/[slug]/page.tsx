@@ -59,20 +59,16 @@ export default async function PostPage({
       )}
       <header className="border-b px-4 pt-2 pb-2 md:px-6 md:pt-6 md:pb-6">
         {postTagNames.length > 0 && (
-          <div className="mb-1 md:mb-3 flex items-center gap-2">
+          <div className="mb-1 md:mb-3 flex flex-wrap items-center gap-2">
             {postTagNames.map((tag, i) => {
               const colors = [
-                "bg-red-900 hover:bg-red-800 dark:bg-red-950 dark:hover:bg-red-900",
-                "bg-blue-900 hover:bg-blue-800 dark:bg-blue-950 dark:hover:bg-blue-900",
-                "bg-green-900 hover:bg-green-800 dark:bg-green-950 dark:hover:bg-green-900",
-                "bg-purple-900 hover:bg-purple-800 dark:bg-purple-950 dark:hover:bg-purple-900",
-                "bg-amber-900 hover:bg-amber-800 dark:bg-amber-950 dark:hover:bg-amber-900",
-                "bg-pink-900 hover:bg-pink-800 dark:bg-pink-950 dark:hover:bg-pink-900",
-                "bg-cyan-900 hover:bg-cyan-800 dark:bg-cyan-950 dark:hover:bg-cyan-900",
+                "bg-[#8ea885]",
+                "bg-[#df7988]",
+                "bg-[#0177b8]",
               ];
               return (
                 <Link key={tag} href={`/tags/${tag}`}>
-                  <Badge className={`rounded-md px-3 py-1 text-sm text-white border-0 ${colors[i % colors.length]}`}>
+                  <Badge className={`rounded-[4px] px-4 py-2 text-sm text-white border-0 ${colors[i % colors.length]}`}>
                     {tag}
                   </Badge>
                 </Link>
