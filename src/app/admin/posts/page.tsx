@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { posts } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { posts, tags, postTags } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -10,6 +10,18 @@ export default async function AdminPostsPage() {
     .select()
     .from(posts)
     .orderBy(desc(posts.updatedAt));
+
+  // Fetch all post-tag mappings in one query
+  const allPostTags = await db
+    .select({ postId: postTags.postId, name: tags.name })
+    .from(postTags)
+    .innerJoin(tags, eq(postTags.tagId, tags.id));
+
+  const tagsByPostId = new Map<number, string[]>();
+  for (const pt of allPostTags) {
+    if (!tagsByPostId.has(pt.postId)) tagsByPostId.set(pt.postId, []);
+    tagsByPostId.get(pt.postId)!.push(pt.name);
+  }
 
   return (
     <div>
@@ -37,7 +49,7 @@ export default async function AdminPostsPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                {post.tags?.map((tag) => (
+                {tagsByPostId.get(post.id)?.map((tag) => (
                   <Badge key={tag} variant="outline">
                     {tag}
                   </Badge>

@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { posts } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { posts, tags, postTags } from "@/db/schema";
+import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -15,6 +15,30 @@ function slugify(text: string): string {
     .replace(/-+/g, "-");
 }
 
+async function syncPostTags(postId: number, tagNames: string[]) {
+  // Delete existing post_tags
+  await db.delete(postTags).where(eq(postTags.postId, postId));
+
+  if (tagNames.length === 0) return;
+
+  // Upsert tags
+  await db
+    .insert(tags)
+    .values(tagNames.map((name) => ({ name })))
+    .onConflictDoNothing();
+
+  // Get tag IDs
+  const tagRows = await db
+    .select({ id: tags.id })
+    .from(tags)
+    .where(inArray(tags.name, tagNames));
+
+  // Insert post_tags
+  await db
+    .insert(postTags)
+    .values(tagRows.map((t) => ({ postId, tagId: t.id })));
+}
+
 export async function createPost(formData: {
   title: string;
   content: string;
@@ -25,7 +49,6 @@ export async function createPost(formData: {
   caltopoUrl?: string;
   peakbaggerUrl?: string;
   nwsUrl?: string;
-
   tags?: string[];
   status?: string;
 }) {
@@ -46,12 +69,12 @@ export async function createPost(formData: {
       caltopoUrl: formData.caltopoUrl || null,
       peakbaggerUrl: formData.peakbaggerUrl || null,
       nwsUrl: formData.nwsUrl || null,
-
-      tags: formData.tags || [],
       status: formData.status || "draft",
       publishedAt: isPublished ? new Date() : null,
     })
     .returning();
+
+  await syncPostTags(post.id, formData.tags || []);
 
   revalidatePath("/");
   revalidatePath("/admin/posts");
@@ -70,7 +93,6 @@ export async function updatePost(
     caltopoUrl?: string;
     peakbaggerUrl?: string;
     nwsUrl?: string;
-
     tags?: string[];
     status?: string;
   }
@@ -98,13 +120,16 @@ export async function updatePost(
       caltopoUrl: formData.caltopoUrl || null,
       peakbaggerUrl: formData.peakbaggerUrl || null,
       nwsUrl: formData.nwsUrl || null,
-
-      tags: formData.tags || [],
       status: formData.status || "draft",
-      publishedAt: isPublished && !existing?.publishedAt ? new Date() : existing?.publishedAt,
+      publishedAt:
+        isPublished && !existing?.publishedAt
+          ? new Date()
+          : existing?.publishedAt,
       updatedAt: new Date(),
     })
     .where(eq(posts.id, id));
+
+  await syncPostTags(id, formData.tags || []);
 
   revalidatePath("/");
   revalidatePath("/admin/posts");

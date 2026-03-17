@@ -20,10 +20,16 @@ function formatDate(d: Date | null | undefined) {
   return new Date(d).toISOString().split("T")[0];
 }
 
-export default function EditPostForm({ post }: { post: Post }) {
+export default function EditPostForm({
+  post,
+  tags: initialTags,
+}: {
+  post: Post;
+  tags: string[];
+}) {
   const [title, setTitle] = useState(post.title);
   const [description, setDescription] = useState(post.description || "");
-  const [tags, setTags] = useState(post.tags?.join(", ") || "");
+  const [tags, setTags] = useState(initialTags.join(", "));
   const [coverImage, setCoverImage] = useState(post.coverImage || "");
   const [tripDate, setTripDate] = useState(formatDate(post.tripDate));
   const [gpxUrl, setGpxUrl] = useState(post.gpxUrl || "");

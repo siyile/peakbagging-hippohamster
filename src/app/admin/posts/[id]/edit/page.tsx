@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { posts } from "@/db/schema";
+import { posts, tags, postTags } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import EditPostForm from "./edit-form";
@@ -22,5 +22,13 @@ export default async function EditPostPage({
     notFound();
   }
 
-  return <EditPostForm post={post} />;
+  const postTagRows = await db
+    .select({ name: tags.name })
+    .from(postTags)
+    .innerJoin(tags, eq(postTags.tagId, tags.id))
+    .where(eq(postTags.postId, postId));
+
+  const postTagNames = postTagRows.map((r) => r.name);
+
+  return <EditPostForm post={post} tags={postTagNames} />;
 }

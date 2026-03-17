@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { posts } from "@/db/schema";
+import { posts, tags, postTags } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,13 @@ export default async function PostPage({
     .where(eq(posts.id, post.id))
     .execute();
 
+  const postTagRows = await db
+    .select({ name: tags.name })
+    .from(postTags)
+    .innerJoin(tags, eq(postTags.tagId, tags.id))
+    .where(eq(postTags.postId, post.id));
+  const postTagNames = postTagRows.map((r) => r.name);
+
   const html = generateHTML(post.content as Parameters<typeof generateHTML>[0], [
     StarterKit,
     FigureImage,
@@ -51,9 +58,9 @@ export default async function PostPage({
         />
       )}
       <header className="border-b px-4 pt-2 pb-2 md:px-6 md:pt-6 md:pb-6">
-        {post.tags && post.tags.length > 0 && (
+        {postTagNames.length > 0 && (
           <div className="mb-1 md:mb-3 flex items-center gap-2">
-            {post.tags.map((tag, i) => {
+            {postTagNames.map((tag, i) => {
               const colors = [
                 "bg-red-900 hover:bg-red-800 dark:bg-red-950 dark:hover:bg-red-900",
                 "bg-blue-900 hover:bg-blue-800 dark:bg-blue-950 dark:hover:bg-blue-900",

@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { posts } from "@/db/schema";
-import { desc, eq, arrayContains } from "drizzle-orm";
+import { posts, tags, postTags } from "@/db/schema";
+import { desc, eq, and } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
@@ -13,11 +13,32 @@ export default async function TagPage({
   const decoded = decodeURIComponent(tag);
 
   const tagPosts = await db
-    .select()
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      description: posts.description,
+      publishedAt: posts.publishedAt,
+    })
     .from(posts)
-    .where(eq(posts.status, "published"))
-    .where(arrayContains(posts.tags, [decoded]))
+    .innerJoin(postTags, eq(posts.id, postTags.postId))
+    .innerJoin(tags, eq(postTags.tagId, tags.id))
+    .where(and(eq(posts.status, "published"), eq(tags.name, decoded)))
     .orderBy(desc(posts.publishedAt));
+
+  // Fetch tags for each post
+  const postIds = tagPosts.map((p) => p.id);
+  let postTagsMap = new Map<number, string[]>();
+  if (postIds.length > 0) {
+    const allTags = await db
+      .select({ postId: postTags.postId, name: tags.name })
+      .from(postTags)
+      .innerJoin(tags, eq(postTags.tagId, tags.id));
+    for (const pt of allTags) {
+      if (!postTagsMap.has(pt.postId)) postTagsMap.set(pt.postId, []);
+      postTagsMap.get(pt.postId)!.push(pt.name);
+    }
+  }
 
   return (
     <div>
@@ -29,7 +50,7 @@ export default async function TagPage({
       </div>
 
       <Link href="/" className="mb-6 inline-block text-sm text-muted-foreground underline">
-        ← All posts
+        &larr; All posts
       </Link>
 
       {tagPosts.length === 0 ? (
@@ -52,7 +73,7 @@ export default async function TagPage({
                     {new Date(post.publishedAt).toLocaleDateString()}
                   </time>
                 )}
-                {post.tags?.map((t) => (
+                {postTagsMap.get(post.id)?.map((t) => (
                   <Link key={t} href={`/tags/${t}`}>
                     <Badge variant="outline" className="cursor-pointer">
                       {t}
