@@ -21,6 +21,15 @@ const Editor = dynamic(() => import("@/components/editor/editor"), {
   ssr: false,
 });
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-");
+}
+
 export default function NewPostPage() {
   const [title, setTitle] = useState("");
   const [description, setExcerpt] = useState("");
@@ -37,6 +46,9 @@ export default function NewPostPage() {
   const [uploadingGpx, setUploadingGpx] = useState(false);
   const editorRef = useRef<TiptapEditor | null>(null);
 
+  const slug = slugify(title);
+  const uploadPath = title && location ? { location, slug } : undefined;
+
   async function handleGpxUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -45,9 +57,14 @@ export default function NewPostPage() {
       e.target.value = "";
       return;
     }
+    if (!title || !location) {
+      alert("Please set title and location before uploading files");
+      e.target.value = "";
+      return;
+    }
     setUploadingGpx(true);
     try {
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, { location, slug: slugify(title) });
       setGpxUrl(url);
     } finally {
       setUploadingGpx(false);
@@ -57,9 +74,14 @@ export default function NewPostPage() {
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!title || !location) {
+      alert("Please set title and location before uploading images");
+      e.target.value = "";
+      return;
+    }
     setUploadingCover(true);
     try {
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, { location, slug: slugify(title) });
       setCoverImage(url);
     } finally {
       setUploadingCover(false);
@@ -68,7 +90,10 @@ export default function NewPostPage() {
 
   async function handleSave(status: string) {
     const content = editorRef.current?.getJSON();
-    if (!title || !content) return;
+    if (!title || !location || !content) {
+      alert("Title and location are required");
+      return;
+    }
     setSaving(true);
     try {
       await createPost({
@@ -252,7 +277,7 @@ export default function NewPostPage() {
 
       <div className="space-y-2">
         <Label>Content</Label>
-        <Editor editorRef={editorRef} />
+        <Editor editorRef={editorRef} uploadPath={uploadPath} />
       </div>
     </div>
   );

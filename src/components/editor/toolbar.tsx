@@ -52,9 +52,19 @@ function Separator() {
   return <div className="mx-0.5 h-4 w-px bg-border" />;
 }
 
-export function EditorToolbar({ editor }: { editor: Editor }) {
+interface UploadPath {
+  location: string;
+  slug: string;
+}
+
+export function EditorToolbar({ editor, uploadPath }: { editor: Editor; uploadPath?: UploadPath }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadPathRef = useRef(uploadPath);
   const [, setTick] = useState(0);
+
+  useEffect(() => {
+    uploadPathRef.current = uploadPath;
+  }, [uploadPath]);
 
   useEffect(() => {
     const onUpdate = () => setTick((n) => n + 1);
@@ -82,7 +92,7 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
       const file = e.target.files?.[0];
       if (!file) return;
       try {
-        const url = await uploadImage(file);
+        const url = await uploadImage(file, uploadPathRef.current);
         console.log("[toolbar] inserting image with url:", url);
         const result = editor.chain().focus().setImage({ src: url }).run();
         console.log("[toolbar] setImage result:", result);

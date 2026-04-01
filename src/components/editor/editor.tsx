@@ -6,7 +6,7 @@ import {
   type JSONContent,
   type Editor as TiptapEditor,
 } from "@tiptap/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -16,12 +16,22 @@ import { FigureNodeView } from "./figure-view";
 import { EditorToolbar } from "./toolbar";
 import { uploadImage } from "./image-upload";
 
+interface UploadPath {
+  location: string;
+  slug: string;
+}
+
 interface EditorProps {
   initialContent?: JSONContent;
   editorRef?: React.MutableRefObject<TiptapEditor | null>;
+  uploadPath?: UploadPath;
 }
 
-export default function Editor({ initialContent, editorRef }: EditorProps) {
+export default function Editor({ initialContent, editorRef, uploadPath }: EditorProps) {
+  const uploadPathRef = useRef(uploadPath);
+  useEffect(() => {
+    uploadPathRef.current = uploadPath;
+  }, [uploadPath]);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -46,7 +56,7 @@ export default function Editor({ initialContent, editorRef }: EditorProps) {
         if (!file.type.startsWith("image/")) return false;
 
         event.preventDefault();
-        uploadImage(file).then((url) => {
+        uploadImage(file, uploadPathRef.current).then((url) => {
           const pos =
             view.posAtCoords({
               left: event.clientX,
@@ -66,7 +76,7 @@ export default function Editor({ initialContent, editorRef }: EditorProps) {
             event.preventDefault();
             const file = item.getAsFile();
             if (!file) return false;
-            uploadImage(file).then((url) => {
+            uploadImage(file, uploadPathRef.current).then((url) => {
               const node = view.state.schema.nodes.image.create({ src: url });
               view.dispatch(view.state.tr.replaceSelectionWith(node));
             });
@@ -86,7 +96,7 @@ export default function Editor({ initialContent, editorRef }: EditorProps) {
 
   return (
     <div className="rounded-lg border bg-background">
-      <EditorToolbar editor={editor} />
+      <EditorToolbar editor={editor} uploadPath={uploadPath} />
       <EditorContent
         editor={editor}
         className="prose dark:prose-invert max-w-none p-4"

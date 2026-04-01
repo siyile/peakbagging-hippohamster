@@ -56,6 +56,8 @@ export default function EditPostForm({
   const [uploadingGpx, setUploadingGpx] = useState(false);
   const editorRef = useRef<TiptapEditor | null>(null);
 
+  const uploadPath = title && location ? { location, slug: post.slug } : undefined;
+
   async function handleGpxUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -64,9 +66,14 @@ export default function EditPostForm({
       e.target.value = "";
       return;
     }
+    if (!title || !location) {
+      alert("Please set title and location before uploading files");
+      e.target.value = "";
+      return;
+    }
     setUploadingGpx(true);
     try {
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, { location, slug: post.slug });
       setGpxUrl(url);
     } finally {
       setUploadingGpx(false);
@@ -76,9 +83,14 @@ export default function EditPostForm({
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!title || !location) {
+      alert("Please set title and location before uploading images");
+      e.target.value = "";
+      return;
+    }
     setUploadingCover(true);
     try {
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, { location, slug: post.slug });
       setCoverImage(url);
     } finally {
       setUploadingCover(false);
@@ -87,7 +99,10 @@ export default function EditPostForm({
 
   async function handleSave(status: string) {
     const content = editorRef.current?.getJSON();
-    if (!title || !content) return;
+    if (!title || !location || !content) {
+      alert("Title and location are required");
+      return;
+    }
     setSaving(true);
     try {
       await updatePost(post.id, {
@@ -291,6 +306,7 @@ export default function EditPostForm({
         <Editor
           initialContent={post.content as JSONContent}
           editorRef={editorRef}
+          uploadPath={uploadPath}
         />
       </div>
     </div>
