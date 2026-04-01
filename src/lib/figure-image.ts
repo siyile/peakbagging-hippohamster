@@ -34,18 +34,21 @@ export const FigureImage = Image.extend({
 
   renderHTML({ node, HTMLAttributes }) {
     const caption = node.attrs.caption;
+    const imgAttrs = mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
+      loading: "lazy",
+    });
     if (caption) {
       return [
         "figure",
         { class: "image-figure" },
-        ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)],
+        ["img", imgAttrs],
         ["figcaption", {}, caption],
       ];
     }
     return [
       "figure",
       { class: "image-figure" },
-      ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)],
+      ["img", imgAttrs],
     ];
   },
 });

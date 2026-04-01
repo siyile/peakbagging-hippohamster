@@ -26,7 +26,7 @@ export default async function TagPage({
       .from(posts)
       .innerJoin(postTags, eq(posts.id, postTags.postId))
       .innerJoin(tags, eq(postTags.tagId, tags.id))
-      .where(and(eq(posts.status, "published"), eq(tags.name, decoded)))
+      .where(and(eq(posts.status, "published"), eq(tags.name, decoded.toLowerCase())))
       .orderBy(desc(posts.publishedAt))
       .limit(5),
     db
@@ -39,7 +39,7 @@ export default async function TagPage({
       .from(posts)
       .innerJoin(postTags, eq(posts.id, postTags.postId))
       .innerJoin(tags, eq(postTags.tagId, tags.id))
-      .where(and(eq(posts.status, "published"), eq(tags.name, decoded)))
+      .where(and(eq(posts.status, "published"), eq(tags.name, decoded.toLowerCase())))
       .orderBy(desc(posts.viewCount))
       .limit(5),
   ]);
@@ -68,7 +68,7 @@ export default async function TagPage({
         <PostLinkList
           title={`Most Popular ${decoded} Trips`}
           posts={popularPosts}
-          readMoreHref="#"
+          readMoreHref="/posts"
         />
       </div>
 

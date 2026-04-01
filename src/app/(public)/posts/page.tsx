@@ -6,8 +6,8 @@ import { NavBar } from "@/components/nav-bar";
 import { PostCardList } from "@/components/post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
 
-export default async function HomePage() {
-  const [featuredClimbs, recentPosts] = await Promise.all([
+export default async function PostsPage() {
+  const [latestPosts, popularPosts] = await Promise.all([
     db
       .select({
         title: posts.title,
@@ -18,8 +18,7 @@ export default async function HomePage() {
       })
       .from(posts)
       .where(eq(posts.status, "published"))
-      .orderBy(desc(posts.viewCount))
-      .limit(5),
+      .orderBy(desc(posts.publishedAt)),
     db
       .select({
         title: posts.title,
@@ -29,7 +28,7 @@ export default async function HomePage() {
       })
       .from(posts)
       .where(eq(posts.status, "published"))
-      .orderBy(desc(posts.publishedAt))
+      .orderBy(desc(posts.viewCount))
       .limit(5),
   ]);
 
@@ -38,28 +37,18 @@ export default async function HomePage() {
       <HeroBanner />
       <NavBar />
 
-      {/* Desktop: Featured Climbs + Recent Posts side by side */}
+      {/* Desktop layout */}
       <div className="hidden md:grid grid-cols-[2fr_auto_1fr] gap-8 mt-4">
-        <PostCardList title="Featured Climbs" posts={featuredClimbs} />
+        <PostCardList title="Latest Climbs" posts={latestPosts} />
         <div className="w-px bg-border" />
-        <PostLinkList title="Recent Post" posts={recentPosts} readMoreHref="/posts" />
+        <PostLinkList title="Most Popular" posts={popularPosts} />
       </div>
 
       {/* Mobile layout */}
       <div className="md:hidden px-4 space-y-3">
-        <PostCardList
-          title="Featured Climbs"
-          posts={featuredClimbs}
-          moreHref="/posts"
-          moreLabel="More Featured Climbs"
-        />
+        <PostCardList title="Most Popular" posts={popularPosts} />
         <div className="-mx-4 border-t border-gray-300" />
-        <PostLinkList
-          title="Recent Posts"
-          posts={recentPosts}
-          moreHref="/posts"
-          moreLabel="More Recent Posts"
-        />
+        <PostCardList title="Latest Climbs" posts={latestPosts} />
       </div>
     </div>
   );
