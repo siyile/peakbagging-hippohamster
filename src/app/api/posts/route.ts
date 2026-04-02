@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { posts, tags, postTags } from "@/db/schema";
+import { eq, and, desc } from "drizzle-orm";
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const offset = parseInt(url.searchParams.get("offset") || "0", 10);
+  const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+  const sort = url.searchParams.get("sort") || "latest";
+  const tag = url.searchParams.get("tag");
+
+  const orderBy =
+    sort === "popular" ? desc(posts.viewCount) : desc(posts.publishedAt);
+
+  let query;
+
+  if (tag) {
+    query = db
+      .select({
+        title: posts.title,
+        slug: posts.slug,
+        description: posts.description,
+        coverImage: posts.coverImage,
+        coverImageThumb: posts.coverImageThumb,
+        tripDate: posts.tripDate,
+      })
+      .from(posts)
+      .innerJoin(postTags, eq(posts.id, postTags.postId))
+      .innerJoin(tags, eq(postTags.tagId, tags.id))
+      .where(and(eq(posts.status, "published"), eq(tags.name, tag.toLowerCase())))
+      .orderBy(orderBy)
+      .offset(offset)
+      .limit(limit);
+  } else {
+    query = db
+      .select({
+        title: posts.title,
+        slug: posts.slug,
+        description: posts.description,
+        coverImage: posts.coverImage,
+        coverImageThumb: posts.coverImageThumb,
+        tripDate: posts.tripDate,
+      })
+      .from(posts)
+      .where(eq(posts.status, "published"))
+      .orderBy(orderBy)
+      .offset(offset)
+      .limit(limit);
+  }
+
+  const rows = await query;
+
+  return NextResponse.json({ posts: rows, hasMore: rows.length === limit });
+}

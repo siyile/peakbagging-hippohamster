@@ -3,8 +3,10 @@ import { posts } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
-import { PostCardList } from "@/components/post-card-list";
+import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
+
+const PAGE_SIZE = 10;
 
 export default async function HomePage() {
   const [featuredClimbs, recentPosts] = await Promise.all([
@@ -20,7 +22,7 @@ export default async function HomePage() {
       .from(posts)
       .where(eq(posts.status, "published"))
       .orderBy(desc(posts.viewCount))
-      .limit(5),
+      .limit(PAGE_SIZE),
     db
       .select({
         title: posts.title,
@@ -42,18 +44,23 @@ export default async function HomePage() {
 
       {/* Desktop: Featured Climbs + Recent Posts side by side */}
       <div className="hidden md:grid grid-cols-[2fr_auto_1fr] gap-8 mt-4">
-        <PostCardList title="Featured Climbs" posts={featuredClimbs} />
+        <InfinitePostCardList
+          title="Featured Climbs"
+          initialPosts={featuredClimbs}
+          sort="popular"
+          pageSize={PAGE_SIZE}
+        />
         <div className="w-px bg-border" />
         <PostLinkList title="Recent Post" posts={recentPosts} readMoreHref="/posts" />
       </div>
 
       {/* Mobile layout */}
       <div className="md:hidden px-4 space-y-3">
-        <PostCardList
+        <InfinitePostCardList
           title="Featured Climbs"
-          posts={featuredClimbs}
-          moreHref="/posts"
-          moreLabel="More Featured Climbs"
+          initialPosts={featuredClimbs}
+          sort="popular"
+          pageSize={PAGE_SIZE}
         />
         <div className="-mx-4 border-t border-gray-300" />
         <PostLinkList

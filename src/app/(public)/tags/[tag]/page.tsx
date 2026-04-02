@@ -3,8 +3,11 @@ import { posts, tags, postTags } from "@/db/schema";
 import { desc, eq, and } from "drizzle-orm";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
+import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PostCardList } from "@/components/post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
+
+const PAGE_SIZE = 10;
 
 export default async function TagPage({
   params,
@@ -29,7 +32,7 @@ export default async function TagPage({
       .innerJoin(tags, eq(postTags.tagId, tags.id))
       .where(and(eq(posts.status, "published"), eq(tags.name, decoded.toLowerCase())))
       .orderBy(desc(posts.publishedAt))
-      .limit(5),
+      .limit(PAGE_SIZE),
     db
       .select({
         title: posts.title,
@@ -65,7 +68,13 @@ export default async function TagPage({
 
       {/* Desktop layout */}
       <div className="hidden md:grid grid-cols-[2fr_auto_1fr] gap-8 mt-4">
-        <PostCardList title={`Latest ${decoded} Trips`} posts={latestPosts} />
+        <InfinitePostCardList
+          title={`Latest ${decoded} Trips`}
+          initialPosts={latestPosts}
+          sort="latest"
+          tag={decoded}
+          pageSize={PAGE_SIZE}
+        />
         <div className="w-px bg-border" />
         <PostLinkList
           title={`Most Popular ${decoded} Trips`}
@@ -78,7 +87,13 @@ export default async function TagPage({
       <div className="md:hidden px-4 space-y-3">
         <PostCardList title={`Most Popular ${decoded} Trips`} posts={popularPosts} />
         <div className="-mx-4 border-t border-gray-300" />
-        <PostCardList title={`Latest ${decoded} Trips`} posts={latestPosts} />
+        <InfinitePostCardList
+          title={`Latest ${decoded} Trips`}
+          initialPosts={latestPosts}
+          sort="latest"
+          tag={decoded}
+          pageSize={PAGE_SIZE}
+        />
       </div>
     </div>
   );
