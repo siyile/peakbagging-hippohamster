@@ -5,6 +5,7 @@ interface PostLink {
   slug: string;
   description: string | null;
   coverImage?: string | null;
+  coverImageThumb?: string | null;
 }
 
 export function PostLinkList({
@@ -60,7 +61,7 @@ export function PostLinkList({
             <Link key={post.slug} href={`/posts/${post.slug}`} className="block group">
               {post.coverImage && (
                 <img
-                  src={post.coverImage}
+                  src={post.coverImageThumb || post.coverImage}
                   alt={post.title}
                   className="w-full aspect-[2/1] object-cover rounded-md"
                 />

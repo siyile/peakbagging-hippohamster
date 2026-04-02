@@ -45,6 +45,7 @@ export default function EditPostForm({
   );
   const [location, setLocation] = useState(initialLocation);
   const [coverImage, setCoverImage] = useState(post.coverImage || "");
+  const [coverImageThumb, setCoverImageThumb] = useState(post.coverImageThumb || "");
   const [tripDate, setTripDate] = useState(formatDate(post.tripDate));
   const [gpxUrl, setGpxUrl] = useState(post.gpxUrl || "");
   const [caltopoUrl, setCaltopoUrl] = useState(post.caltopoUrl || "");
@@ -73,7 +74,7 @@ export default function EditPostForm({
     }
     setUploadingGpx(true);
     try {
-      const url = await uploadImage(file, { location, slug: post.slug });
+      const { url } = await uploadImage(file, { location, slug: post.slug });
       setGpxUrl(url);
     } finally {
       setUploadingGpx(false);
@@ -90,8 +91,9 @@ export default function EditPostForm({
     }
     setUploadingCover(true);
     try {
-      const url = await uploadImage(file, { location, slug: post.slug });
+      const { url, thumbUrl } = await uploadImage(file, { location, slug: post.slug, cover: true });
       setCoverImage(url);
+      if (thumbUrl) setCoverImageThumb(thumbUrl);
     } finally {
       setUploadingCover(false);
     }
@@ -110,6 +112,7 @@ export default function EditPostForm({
         content: JSON.stringify(content),
         description: description || undefined,
         coverImage: coverImage || undefined,
+        coverImageThumb: coverImageThumb || undefined,
         tripDate: tripDate || undefined,
         gpxUrl: gpxUrl || undefined,
         caltopoUrl: caltopoUrl || undefined,
@@ -195,7 +198,7 @@ export default function EditPostForm({
               variant="destructive"
               size="sm"
               className="absolute top-2 right-2"
-              onClick={() => setCoverImage("")}
+              onClick={() => { setCoverImage(""); setCoverImageThumb(""); }}
             >
               Remove
             </Button>

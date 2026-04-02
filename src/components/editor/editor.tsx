@@ -56,7 +56,7 @@ export default function Editor({ initialContent, editorRef, uploadPath }: Editor
         if (!file.type.startsWith("image/")) return false;
 
         event.preventDefault();
-        uploadImage(file, uploadPathRef.current).then((url) => {
+        uploadImage(file, uploadPathRef.current).then(({ url }) => {
           const pos =
             view.posAtCoords({
               left: event.clientX,
@@ -76,7 +76,7 @@ export default function Editor({ initialContent, editorRef, uploadPath }: Editor
             event.preventDefault();
             const file = item.getAsFile();
             if (!file) return false;
-            uploadImage(file, uploadPathRef.current).then((url) => {
+            uploadImage(file, uploadPathRef.current).then(({ url }) => {
               const node = view.state.schema.nodes.image.create({ src: url });
               view.dispatch(view.state.tr.replaceSelectionWith(node));
             });

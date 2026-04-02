@@ -21,6 +21,7 @@ export default async function TagPage({
         slug: posts.slug,
         description: posts.description,
         coverImage: posts.coverImage,
+        coverImageThumb: posts.coverImageThumb,
         tripDate: posts.tripDate,
       })
       .from(posts)
@@ -35,6 +36,7 @@ export default async function TagPage({
         slug: posts.slug,
         description: posts.description,
         coverImage: posts.coverImage,
+        coverImageThumb: posts.coverImageThumb,
       })
       .from(posts)
       .innerJoin(postTags, eq(posts.id, postTags.postId))

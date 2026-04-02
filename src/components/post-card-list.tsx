@@ -5,6 +5,7 @@ interface PostCard {
   slug: string;
   description: string | null;
   coverImage: string | null;
+  coverImageThumb: string | null;
   tripDate?: Date | null;
 }
 
@@ -53,7 +54,7 @@ export function PostCardList({
               </div>
               {fp.coverImage && (
                 <img
-                  src={fp.coverImage}
+                  src={fp.coverImageThumb || fp.coverImage}
                   alt={fp.title}
                   className="w-[280px] h-[160px] object-cover rounded-md shrink-0"
                 />
@@ -71,7 +72,7 @@ export function PostCardList({
             <Link key={fp.slug} href={`/posts/${fp.slug}`} className="block group">
               {fp.coverImage && (
                 <img
-                  src={fp.coverImage}
+                  src={fp.coverImageThumb || fp.coverImage}
                   alt={fp.title}
                   className="w-full aspect-[2/1] object-cover rounded-md"
                 />

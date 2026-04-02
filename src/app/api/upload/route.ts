@@ -25,6 +25,7 @@ export async function POST(request: Request) {
   const file = formData.get("file") as File;
   const location = formData.get("location") as string | null;
   const slug = formData.get("slug") as string | null;
+  const isCover = formData.get("cover") === "true";
 
   if (!file) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -58,9 +59,19 @@ export async function POST(request: Request) {
     prefix = `uploads/${slugify(location)}/${slugify(slug)}`;
   }
 
-  const key = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const key = `${prefix}/${id}.${ext}`;
   const url = await uploadToR2(finalBuffer, key, contentType);
 
-  return NextResponse.json({ url });
+  let thumbUrl: string | undefined;
+  if (isCover && isImage) {
+    const thumbBuffer = await sharp(rawBuffer)
+      .resize(800, undefined, { withoutEnlargement: true })
+      .webp({ quality: 85 })
+      .toBuffer();
+    const thumbKey = `${prefix}/${id}-thumb.${ext}`;
+    thumbUrl = await uploadToR2(thumbBuffer, thumbKey, contentType);
+  }
+
+  return NextResponse.json({ url, thumbUrl });
 }

@@ -36,6 +36,7 @@ export default function NewPostPage() {
   const [tags, setTags] = useState("");
   const [location, setLocation] = useState("");
   const [coverImage, setCoverImage] = useState("");
+  const [coverImageThumb, setCoverImageThumb] = useState("");
   const [tripDate, setTripDate] = useState("");
   const [gpxUrl, setGpxUrl] = useState("");
   const [caltopoUrl, setCaltopoUrl] = useState("");
@@ -64,7 +65,7 @@ export default function NewPostPage() {
     }
     setUploadingGpx(true);
     try {
-      const url = await uploadImage(file, { location, slug: slugify(title) });
+      const { url } = await uploadImage(file, { location, slug: slugify(title) });
       setGpxUrl(url);
     } finally {
       setUploadingGpx(false);
@@ -81,8 +82,9 @@ export default function NewPostPage() {
     }
     setUploadingCover(true);
     try {
-      const url = await uploadImage(file, { location, slug: slugify(title) });
+      const { url, thumbUrl } = await uploadImage(file, { location, slug: slugify(title), cover: true });
       setCoverImage(url);
+      if (thumbUrl) setCoverImageThumb(thumbUrl);
     } finally {
       setUploadingCover(false);
     }
@@ -101,6 +103,7 @@ export default function NewPostPage() {
         content: JSON.stringify(content),
         description: description || undefined,
         coverImage: coverImage || undefined,
+        coverImageThumb: coverImageThumb || undefined,
         tripDate: tripDate || undefined,
         gpxUrl: gpxUrl || undefined,
         caltopoUrl: caltopoUrl || undefined,
@@ -169,7 +172,7 @@ export default function NewPostPage() {
               variant="destructive"
               size="sm"
               className="absolute top-2 right-2"
-              onClick={() => setCoverImage("")}
+              onClick={() => { setCoverImage(""); setCoverImageThumb(""); }}
             >
               Remove
             </Button>

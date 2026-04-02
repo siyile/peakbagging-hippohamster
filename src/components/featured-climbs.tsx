@@ -22,6 +22,7 @@ export async function FeaturedClimbs({
       slug: posts.slug,
       description: posts.description,
       coverImage: posts.coverImage,
+      coverImageThumb: posts.coverImageThumb,
       viewCount: posts.viewCount,
     })
     .from(posts)
@@ -47,7 +48,7 @@ export async function FeaturedClimbs({
             )}
             {fp.coverImage && (
               <img
-                src={fp.coverImage}
+                src={fp.coverImageThumb || fp.coverImage}
                 alt={fp.title}
                 className="w-full aspect-[2/1] object-cover rounded-md mt-2"
               />

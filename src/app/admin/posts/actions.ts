@@ -44,6 +44,7 @@ export async function createPost(formData: {
   content: string;
   description?: string;
   coverImage?: string;
+  coverImageThumb?: string;
   tripDate?: string;
   gpxUrl?: string;
   caltopoUrl?: string;
@@ -64,6 +65,7 @@ export async function createPost(formData: {
       content,
       description: formData.description || null,
       coverImage: formData.coverImage || null,
+      coverImageThumb: formData.coverImageThumb || null,
       tripDate: formData.tripDate ? new Date(formData.tripDate) : null,
       gpxUrl: formData.gpxUrl || null,
       caltopoUrl: formData.caltopoUrl || null,
@@ -88,6 +90,7 @@ export async function updatePost(
     content: string;
     description?: string;
     coverImage?: string;
+    coverImageThumb?: string;
     tripDate?: string;
     gpxUrl?: string;
     caltopoUrl?: string;
@@ -115,6 +118,7 @@ export async function updatePost(
       content,
       description: formData.description || null,
       coverImage: formData.coverImage || null,
+      coverImageThumb: formData.coverImageThumb || null,
       tripDate: formData.tripDate ? new Date(formData.tripDate) : null,
       gpxUrl: formData.gpxUrl || null,
       caltopoUrl: formData.caltopoUrl || null,

@@ -1,11 +1,12 @@
 export async function uploadImage(
   file: File,
-  opts?: { location?: string; slug?: string }
-): Promise<string> {
+  opts?: { location?: string; slug?: string; cover?: boolean }
+): Promise<{ url: string; thumbUrl?: string }> {
   const formData = new FormData();
   formData.append("file", file);
   if (opts?.location) formData.append("location", opts.location);
   if (opts?.slug) formData.append("slug", opts.slug);
+  if (opts?.cover) formData.append("cover", "true");
 
   console.log("[image-upload] uploading file:", file.name, file.type, file.size);
 
@@ -28,5 +29,5 @@ export async function uploadImage(
     throw new Error("No URL returned");
   }
 
-  return data.url;
+  return { url: data.url, thumbUrl: data.thumbUrl };
 }

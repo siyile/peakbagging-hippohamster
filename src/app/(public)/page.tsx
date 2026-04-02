@@ -14,6 +14,7 @@ export default async function HomePage() {
         slug: posts.slug,
         description: posts.description,
         coverImage: posts.coverImage,
+        coverImageThumb: posts.coverImageThumb,
         tripDate: posts.tripDate,
       })
       .from(posts)
@@ -26,6 +27,7 @@ export default async function HomePage() {
         slug: posts.slug,
         description: posts.description,
         coverImage: posts.coverImage,
+        coverImageThumb: posts.coverImageThumb,
       })
       .from(posts)
       .where(eq(posts.status, "published"))

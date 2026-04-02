@@ -92,7 +92,7 @@ export function EditorToolbar({ editor, uploadPath }: { editor: Editor; uploadPa
       const file = e.target.files?.[0];
       if (!file) return;
       try {
-        const url = await uploadImage(file, uploadPathRef.current);
+        const { url } = await uploadImage(file, uploadPathRef.current);
         console.log("[toolbar] inserting image with url:", url);
         const result = editor.chain().focus().setImage({ src: url }).run();
         console.log("[toolbar] setImage result:", result);
