@@ -51,14 +51,28 @@ export function MobileMenu() {
               Home
             </Link>
             <Link
-              href="#"
+              href="/tags/Alpine Rock"
+              onClick={() => setOpen(false)}
+              className="w-full border-t px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-muted"
+            >
+              Alpine Rock
+            </Link>
+            <Link
+              href="/tags/Scramble"
+              onClick={() => setOpen(false)}
+              className="w-full border-t px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-muted"
+            >
+              Scramble
+            </Link>
+            <Link
+              href="/about"
               onClick={() => setOpen(false)}
               className="w-full border-t px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-muted"
             >
               About Us
             </Link>
             <div className="border-t px-4 py-3">
-              <h3 className="text-lg font-medium text-muted-foreground">Climbs</h3>
+              <h3 className="text-lg font-medium text-muted-foreground">Location</h3>
             </div>
             {LOCATION_TAGS.map((loc) => (
               <Link

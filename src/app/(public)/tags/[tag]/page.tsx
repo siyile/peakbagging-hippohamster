@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { posts, tags, postTags } from "@/db/schema";
-import { desc, eq, and } from "drizzle-orm";
+import { desc, eq, and, sql } from "drizzle-orm";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
 import { InfinitePostCardList } from "@/components/infinite-post-card-list";
@@ -30,7 +30,7 @@ export default async function TagPage({
       .from(posts)
       .innerJoin(postTags, eq(posts.id, postTags.postId))
       .innerJoin(tags, eq(postTags.tagId, tags.id))
-      .where(and(eq(posts.status, "published"), eq(tags.name, decoded.toLowerCase())))
+      .where(and(eq(posts.status, "published"), sql`lower(${tags.name}) = ${decoded.toLowerCase()}`))
       .orderBy(desc(posts.publishedAt))
       .limit(PAGE_SIZE),
     db
@@ -44,7 +44,7 @@ export default async function TagPage({
       .from(posts)
       .innerJoin(postTags, eq(posts.id, postTags.postId))
       .innerJoin(tags, eq(postTags.tagId, tags.id))
-      .where(and(eq(posts.status, "published"), eq(tags.name, decoded.toLowerCase())))
+      .where(and(eq(posts.status, "published"), sql`lower(${tags.name}) = ${decoded.toLowerCase()}`))
       .orderBy(desc(posts.viewCount))
       .limit(5),
   ]);
@@ -79,7 +79,6 @@ export default async function TagPage({
         <PostLinkList
           title={`Most Popular ${decoded} Trips`}
           posts={popularPosts}
-          readMoreHref="/posts"
         />
       </div>
 

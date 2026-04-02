@@ -9,6 +9,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { FigureImage } from "@/lib/figure-image";
 import TiptapLink from "@tiptap/extension-link";
 import { FeaturedClimbs } from "@/components/featured-climbs";
+import { BackToTop } from "@/components/back-to-top";
 
 export default async function PostPage({
   params,
@@ -128,6 +129,7 @@ export default async function PostPage({
         className="prose dark:prose-invert max-w-none px-4 pt-0 pb-0 md:px-6 md:pt-6 text-black dark:text-white"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      <BackToTop />
     </article>
 
     <FeaturedClimbs excludeId={post.id} className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-6" />

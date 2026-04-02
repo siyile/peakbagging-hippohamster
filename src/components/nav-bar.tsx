@@ -3,10 +3,9 @@ import { LOCATION_TAGS } from "@/lib/constants";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Glacier Climb", href: "/tags/Glacier Climb" },
   { label: "Alpine Rock", href: "/tags/Alpine Rock" },
   { label: "Scramble", href: "/tags/Scramble" },
-  { label: "About Us", href: "#" },
+  { label: "About Us", href: "/about" },
 ];
 
 export function NavBar() {

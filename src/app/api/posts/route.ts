@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { posts, tags, postTags } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       .from(posts)
       .innerJoin(postTags, eq(posts.id, postTags.postId))
       .innerJoin(tags, eq(postTags.tagId, tags.id))
-      .where(and(eq(posts.status, "published"), eq(tags.name, tag.toLowerCase())))
+      .where(and(eq(posts.status, "published"), sql`lower(${tags.name}) = ${tag.toLowerCase()}`))
       .orderBy(orderBy)
       .offset(offset)
       .limit(limit);

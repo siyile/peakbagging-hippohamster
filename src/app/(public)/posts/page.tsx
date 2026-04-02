@@ -52,7 +52,7 @@ export default async function PostsPage() {
           pageSize={PAGE_SIZE}
         />
         <div className="w-px bg-border" />
-        <PostLinkList title="Most Popular" posts={popularPosts} />
+        <PostLinkList title="Most Popular" posts={popularPosts} readMoreHref="/" />
       </div>
 
       {/* Mobile layout */}
