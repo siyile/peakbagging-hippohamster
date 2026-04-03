@@ -7,7 +7,7 @@ import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
 
 export const metadata = {
-  title: "HippoHamster",
+  title: "Home",
 };
 
 const PAGE_SIZE = 10;
