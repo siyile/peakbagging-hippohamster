@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { posts, tags, postTags } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
@@ -10,6 +11,26 @@ import { FigureImage } from "@/lib/figure-image";
 import TiptapLink from "@tiptap/extension-link";
 import { FeaturedClimbs } from "@/components/featured-climbs";
 import { BackToTop } from "@/components/back-to-top";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const [post] = await db
+    .select({ title: posts.title, description: posts.description })
+    .from(posts)
+    .where(eq(posts.slug, slug))
+    .limit(1);
+
+  if (!post) return {};
+
+  return {
+    title: post.title,
+    description: post.description ?? undefined,
+  };
+}
 
 export default async function PostPage({
   params,

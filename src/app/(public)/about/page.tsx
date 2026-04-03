@@ -1,6 +1,10 @@
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
 
+export const metadata = {
+  title: "About",
+};
+
 export default function AboutPage() {
   return (
     <div>

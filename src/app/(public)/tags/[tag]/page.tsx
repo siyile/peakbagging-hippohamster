@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { posts, tags, postTags } from "@/db/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
@@ -6,6 +7,15 @@ import { NavBar } from "@/components/nav-bar";
 import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PostCardList } from "@/components/post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tag: string }>;
+}): Promise<Metadata> {
+  const { tag } = await params;
+  return { title: decodeURIComponent(tag) };
+}
 
 const PAGE_SIZE = 10;
 

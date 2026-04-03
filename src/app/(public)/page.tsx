@@ -6,6 +6,10 @@ import { NavBar } from "@/components/nav-bar";
 import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
 
+export const metadata = {
+  title: "HippoHamster",
+};
+
 const PAGE_SIZE = 10;
 
 export default async function HomePage() {

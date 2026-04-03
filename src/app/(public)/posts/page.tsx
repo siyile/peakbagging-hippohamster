@@ -7,6 +7,10 @@ import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PostCardList } from "@/components/post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
 
+export const metadata = {
+  title: "Recent Articles",
+};
+
 const PAGE_SIZE = 10;
 
 export default async function PostsPage() {
