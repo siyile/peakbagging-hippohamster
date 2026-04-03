@@ -56,18 +56,18 @@ export default async function HomePage() {
 
       {/* Mobile layout */}
       <div className="md:hidden px-4 space-y-3">
+        <PostLinkList
+          title="Recent Posts"
+          posts={recentPosts}
+          moreHref="/posts"
+          moreLabel="Show More"
+        />
+        <div className="-mx-4 border-t border-gray-300" />
         <InfinitePostCardList
           title="Featured Climbs"
           initialPosts={featuredClimbs}
           sort="popular"
           pageSize={PAGE_SIZE}
-        />
-        <div className="-mx-4 border-t border-gray-300" />
-        <PostLinkList
-          title="Recent Posts"
-          posts={recentPosts}
-          moreHref="/posts"
-          moreLabel="More Recent Posts"
         />
       </div>
     </div>

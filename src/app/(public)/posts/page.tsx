@@ -57,8 +57,6 @@ export default async function PostsPage() {
 
       {/* Mobile layout */}
       <div className="md:hidden px-4 space-y-3">
-        <PostCardList title="Most Popular" posts={popularPosts} />
-        <div className="-mx-4 border-t border-gray-300" />
         <InfinitePostCardList
           title="Latest Climbs"
           initialPosts={latestPosts}
