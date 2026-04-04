@@ -1,4 +1,6 @@
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MobileMenu } from "@/components/mobile-menu";
 
 export default function PublicLayout({
@@ -24,6 +26,8 @@ export default function PublicLayout({
     <div className="mx-auto min-h-screen max-w-[1400px] px-0 py-0 md:px-6 md:py-8">
       <main>{children}</main>
     </div>
+    <Analytics />
+    <SpeedInsights />
     </div>
   );
 }

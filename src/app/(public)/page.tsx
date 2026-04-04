@@ -55,13 +55,13 @@ export default async function HomePage() {
           pageSize={PAGE_SIZE}
         />
         <div className="w-px bg-border" />
-        <PostLinkList title="Recent Post" posts={recentPosts} readMoreHref="/posts" />
+        <PostLinkList title="Recent Articles" posts={recentPosts} readMoreHref="/posts" />
       </div>
 
       {/* Mobile layout */}
       <div className="md:hidden px-4 space-y-3">
         <PostLinkList
-          title="Recent Posts"
+          title="Recent Articles"
           posts={recentPosts}
           moreHref="/posts"
           moreLabel="Show More"

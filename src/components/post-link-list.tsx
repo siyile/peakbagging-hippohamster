@@ -55,7 +55,7 @@ export function PostLinkList({
 
       {/* Mobile */}
       <div className="md:hidden">
-        <h2 className="text-3xl font-semibold text-brand-grey">{title}</h2>
+        <h2 className="text-3xl font-semibold text-brand-grey mt-2">{title}</h2>
         <div className="mt-3 space-y-4">
           {posts.map((post) => (
             <Link key={post.slug} href={`/posts/${post.slug}`} className="block group">
