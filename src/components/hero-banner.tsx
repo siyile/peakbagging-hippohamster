@@ -4,9 +4,12 @@ import Link from "next/link";
 export function HeroBanner() {
   return (
     <div className="hidden md:block relative -mt-8 left-1/2 -translate-x-1/2 w-screen overflow-hidden">
-      <img
+      <Image
         src="https://pub-7aa6c67ec9294828987ab42d35f61c0f.r2.dev/uploads/static/home_cover.webp"
         alt="Mountain landscape"
+        width={1400}
+        height={450}
+        priority
         className="w-full h-[450px] object-cover"
       />
       <div className="absolute inset-0 bg-black/20" />

@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { eq, ne, and, desc } from "drizzle-orm";
 import Link from "next/link";
+import Image from "next/image";
 
 export async function FeaturedClimbs({
   excludeId,
@@ -47,9 +48,11 @@ export async function FeaturedClimbs({
               </p>
             )}
             {fp.coverImage && (
-              <img
+              <Image
                 src={fp.coverImageThumb || fp.coverImage}
                 alt={fp.title}
+                width={560}
+                height={280}
                 className="w-full aspect-[2/1] object-cover rounded-md mt-2"
               />
             )}

@@ -11,6 +11,15 @@ import { FigureImage } from "@/lib/figure-image";
 import TiptapLink from "@tiptap/extension-link";
 import { FeaturedClimbs } from "@/components/featured-climbs";
 import { BackToTop } from "@/components/back-to-top";
+import Image from "next/image";
+
+export async function generateStaticParams() {
+  const rows = await db
+    .select({ slug: posts.slug })
+    .from(posts)
+    .where(eq(posts.status, "published"));
+  return rows.map((r) => ({ slug: r.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -19,7 +28,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const [post] = await db
-    .select({ title: posts.title, description: posts.description })
+    .select({
+      title: posts.title,
+      description: posts.description,
+      coverImage: posts.coverImage,
+    })
     .from(posts)
     .where(eq(posts.slug, slug))
     .limit(1);
@@ -29,6 +42,19 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.description ?? undefined,
+    openGraph: {
+      title: post.title,
+      description: post.description ?? undefined,
+      type: "article",
+      ...(post.coverImage && {
+        images: [{ url: post.coverImage, width: 1200, height: 630 }],
+      }),
+    },
+    twitter: {
+      title: post.title,
+      description: post.description ?? undefined,
+      ...(post.coverImage && { images: [post.coverImage] }),
+    },
   };
 }
 
@@ -67,15 +93,31 @@ export default async function PostPage({
     TiptapLink,
   ]);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description ?? undefined,
+    ...(post.coverImage && { image: post.coverImage }),
+    ...(post.tripDate && { datePublished: new Date(post.tripDate).toISOString() }),
+    dateModified: post.updatedAt.toISOString(),
+    author: { "@type": "Person", name: "Siyi" },
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-[1fr_var(--featured-w,280px)] gap-0 md:gap-8">
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
     <article>
       {post.coverImage && (
-        <img
+        <Image
           src={post.coverImage}
           alt={post.title}
-          loading="eager"
-          fetchPriority="high"
+          width={1200}
+          height={480}
+          priority
           className="w-full max-h-[480px] object-cover rounded-none md:rounded-xl mb-2 md:mb-0"
         />
       )}
@@ -104,7 +146,7 @@ export default async function PostPage({
         )}
         {post.tripDate && (
           <div className="mt-1 md:mt-3 flex items-center gap-1.5 text-sm md:text-base text-muted-foreground">
-            <time>
+            <time dateTime={new Date(post.tripDate).toISOString()}>
               {new Date(post.tripDate).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",

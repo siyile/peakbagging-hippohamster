@@ -8,6 +8,8 @@ import { PostLinkList } from "@/components/post-link-list";
 
 export const metadata = {
   title: "Home",
+  description:
+    "Featured climbs and recent trip reports from Hippo and Hamster's Washington Cascades alpine adventures.",
 };
 
 const PAGE_SIZE = 10;

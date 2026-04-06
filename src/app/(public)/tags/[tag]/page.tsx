@@ -14,7 +14,11 @@ export async function generateMetadata({
   params: Promise<{ tag: string }>;
 }): Promise<Metadata> {
   const { tag } = await params;
-  return { title: decodeURIComponent(tag) };
+  const decoded = decodeURIComponent(tag);
+  return {
+    title: decoded,
+    description: `Browse all ${decoded} trip reports — detailed route beta with photos from the Washington Cascades.`,
+  };
 }
 
 const PAGE_SIZE = 10;

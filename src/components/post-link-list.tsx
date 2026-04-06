@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface PostLink {
   title: string;
@@ -60,9 +61,11 @@ export function PostLinkList({
           {posts.map((post) => (
             <Link key={post.slug} href={`/posts/${post.slug}`} className="block group">
               {post.coverImage && (
-                <img
+                <Image
                   src={post.coverImageThumb || post.coverImage}
                   alt={post.title}
+                  width={600}
+                  height={300}
                   className="w-full aspect-[2/1] object-cover rounded-md"
                 />
               )}

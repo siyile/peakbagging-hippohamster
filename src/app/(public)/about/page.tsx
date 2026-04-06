@@ -1,8 +1,11 @@
+import Image from "next/image";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
 
 export const metadata = {
   title: "About",
+  description:
+    "Meet Siyi (Hippo) and Chutang (Hamster) — PNW climbers sharing detailed route beta and trip reports from the Washington Cascades.",
 };
 
 export default function AboutPage() {
@@ -25,9 +28,11 @@ export default function AboutPage() {
             </article>
           </div>
           <figure className="mt-6 md:mt-0 md:w-[300px]">
-            <img
+            <Image
               src="https://pub-7aa6c67ec9294828987ab42d35f61c0f.r2.dev/uploads/static/about_us.webp"
               alt="Siyi and Chutang"
+              width={300}
+              height={400}
               className="w-full rounded-xl object-cover"
             />
             <figcaption className="text-sm text-muted-foreground text-center mt-2">Siyi and Chutang at SEWS, Washington Pass 2025</figcaption>

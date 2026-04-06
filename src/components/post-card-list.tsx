@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface PostCard {
   title: string;
@@ -53,9 +54,11 @@ export function PostCardList({
                 )}
               </div>
               {fp.coverImage && (
-                <img
+                <Image
                   src={fp.coverImageThumb || fp.coverImage}
                   alt={fp.title}
+                  width={280}
+                  height={160}
                   className="w-[280px] h-[160px] object-cover rounded-md shrink-0"
                 />
               )}
@@ -71,9 +74,11 @@ export function PostCardList({
           {posts.map((fp) => (
             <Link key={fp.slug} href={`/posts/${fp.slug}`} className="block group">
               {fp.coverImage && (
-                <img
+                <Image
                   src={fp.coverImageThumb || fp.coverImage}
                   alt={fp.title}
+                  width={600}
+                  height={300}
                   className="w-full aspect-[2/1] object-cover rounded-md"
                 />
               )}
