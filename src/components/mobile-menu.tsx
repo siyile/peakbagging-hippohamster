@@ -65,6 +65,13 @@ export function MobileMenu() {
               Scramble
             </Link>
             <Link
+              href="/tags/Ski Touring"
+              onClick={() => setOpen(false)}
+              className="w-full border-t px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-muted"
+            >
+              Ski Touring
+            </Link>
+            <Link
               href="/about"
               onClick={() => setOpen(false)}
               className="w-full border-t px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-muted"

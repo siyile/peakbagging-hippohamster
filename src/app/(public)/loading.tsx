@@ -9,7 +9,7 @@ function CardSkeleton() {
         <Shimmer className="h-5 w-2/3 mt-1" />
         <Shimmer className="h-4 w-24 mt-2" />
       </div>
-      <Shimmer className="w-[280px] h-[160px] shrink-0" />
+      <Shimmer className="w-[280px] aspect-[3/2] shrink-0" />
     </div>
   );
 }
@@ -17,7 +17,7 @@ function CardSkeleton() {
 function MobileCardSkeleton() {
   return (
     <div>
-      <Shimmer className="w-full aspect-[2/1]" />
+      <Shimmer className="w-full aspect-[3/2]" />
       <Shimmer className="h-6 w-3/4 mt-2" />
       <Shimmer className="h-4 w-full mt-1" />
     </div>

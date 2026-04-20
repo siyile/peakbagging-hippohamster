@@ -51,9 +51,9 @@ export async function FeaturedClimbs({
               <Image
                 src={fp.coverImageThumb || fp.coverImage}
                 alt={fp.title}
-                width={560}
-                height={280}
-                className="w-full aspect-[2/1] object-cover rounded-md mt-2"
+                width={600}
+                height={400}
+                className="w-full aspect-[3/2] object-cover rounded-md mt-2"
               />
             )}
           </Link>

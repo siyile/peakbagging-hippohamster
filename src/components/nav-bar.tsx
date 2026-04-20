@@ -5,6 +5,7 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "Alpine Rock", href: "/tags/Alpine Rock" },
   { label: "Scramble", href: "/tags/Scramble" },
+  { label: "Ski Touring", href: "/tags/Ski Touring" },
   { label: "About Us", href: "/about" },
 ];
 

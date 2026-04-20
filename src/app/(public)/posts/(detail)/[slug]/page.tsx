@@ -118,6 +118,8 @@ export default async function PostPage({
           width={1200}
           height={480}
           priority
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI0ODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2UyZThlMCIvPjwvc3ZnPg=="
           className="w-full max-h-[480px] object-cover rounded-none md:rounded-xl mb-2 md:mb-0"
         />
       )}

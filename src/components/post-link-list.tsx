@@ -65,8 +65,8 @@ export function PostLinkList({
                   src={post.coverImageThumb || post.coverImage}
                   alt={post.title}
                   width={600}
-                  height={300}
-                  className="w-full aspect-[2/1] object-cover rounded-md"
+                  height={400}
+                  className="w-full aspect-[3/2] object-cover rounded-md"
                 />
               )}
               <h3 className="text-xl font-semibold text-brand mt-1">{post.title}</h3>
@@ -81,7 +81,7 @@ export function PostLinkList({
         {moreHref && (
           <Link
             href={moreHref}
-            className="mt-4 mb-4 inline-block text-brand font-medium underline"
+            className="mt-2 inline-block text-brand font-medium underline"
           >
             {moreLabel || "Read More"} &gt;
           </Link>

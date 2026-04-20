@@ -41,7 +41,7 @@ export default function Loading() {
             <div key={i}>
               <Shimmer className="h-5 w-3/4" />
               <Shimmer className="h-4 w-full mt-1" />
-              <Shimmer className="w-full aspect-[2/1] mt-2" />
+              <Shimmer className="w-full aspect-[3/2] mt-2" />
             </div>
           ))}
         </div>
