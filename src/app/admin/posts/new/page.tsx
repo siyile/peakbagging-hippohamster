@@ -166,7 +166,7 @@ export default function NewPostPage() {
             <img
               src={coverImage}
               alt="Cover preview"
-              className="h-48 w-full rounded-md border object-cover"
+              className="aspect-[3/2] w-full rounded-md border object-cover"
             />
             <Button
               variant="destructive"

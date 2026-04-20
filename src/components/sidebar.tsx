@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LOCATION_TAGS } from "@/lib/constants";
 
-const climbLinks = [
-  { label: "North Cascades", href: "#" },
-  { label: "South Cascades", href: "#" },
-  { label: "Mount Rainier", href: "#" },
-  { label: "Alpine Lakes Wilderness", href: "#" },
+const navLinks = [
+  { label: "Home", href: "/" },
+  { label: "Alpine Rock", href: "/tags/Alpine Rock" },
+  { label: "Scramble", href: "/tags/Scramble" },
+  { label: "Ski Touring", href: "/tags/Ski Touring" },
+  { label: "About Us", href: "/about" },
 ];
 
 export function Sidebar() {
@@ -26,24 +28,27 @@ export function Sidebar() {
       </p>
 
       <nav className="mt-6 flex flex-col gap-1">
-        <Link href="/" className="text-lg font-medium text-muted-foreground hover:text-foreground">
-          Home
-        </Link>
-        <Link href="#" className="text-lg font-medium text-muted-foreground hover:text-foreground">
-          About Us
-        </Link>
+        {navLinks.map((link) => (
+          <Link
+            key={link.label}
+            href={link.href}
+            className="text-lg font-medium text-muted-foreground hover:text-foreground"
+          >
+            {link.label}
+          </Link>
+        ))}
       </nav>
 
       <div className="mt-6">
-        <h3 className="text-lg text-muted-foreground font-medium">Climbs</h3>
+        <h3 className="text-lg text-muted-foreground font-medium">Location</h3>
         <nav className="mt-1 flex flex-col gap-1">
-          {climbLinks.map((link) => (
+          {LOCATION_TAGS.map((loc) => (
             <Link
-              key={link.label}
-              href={link.href}
+              key={loc}
+              href={`/tags/${loc}`}
               className="text-brand hover:underline font-medium"
             >
-              {link.label}
+              {loc}
             </Link>
           ))}
         </nav>
