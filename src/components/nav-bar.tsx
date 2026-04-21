@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LOCATION_TAGS } from "@/lib/constants";
+import { SearchButton } from "@/components/search-button";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -39,6 +40,10 @@ export function NavBar() {
           </div>
         </div>
       </div>
+      <SearchButton
+        className="text-foreground hover:text-brand cursor-pointer"
+        ariaLabel="Search"
+      />
     </nav>
   );
 }

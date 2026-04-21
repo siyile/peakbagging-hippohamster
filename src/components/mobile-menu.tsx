@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { LOCATION_TAGS } from "@/lib/constants";
+import { SearchButton } from "@/components/search-button";
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -11,11 +12,18 @@ export function MobileMenu() {
   return (
     <div className="md:hidden">
       {/* Bar — always visible, stays above backdrop */}
-      <div className="relative z-50 flex items-center justify-between px-4 pt-3 pb-2 bg-background border-b border-gray-300">
+      <div className="relative z-50 flex items-center justify-between px-4 pt-3 pb-2 bg-background">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.png" alt="Hippo Hamster" width={48} height={48} />
           <span className="text-xl font-bold text-brand">Hippo Hamster</span>
         </Link>
+        <div className="flex items-center">
+          {!open && (
+            <SearchButton
+              className="p-2 text-muted-foreground hover:text-foreground"
+              ariaLabel="Search"
+            />
+          )}
         <button
           onClick={() => setOpen(!open)}
           className="p-2 text-muted-foreground hover:text-foreground"
@@ -34,6 +42,7 @@ export function MobileMenu() {
             </svg>
           )}
         </button>
+        </div>
       </div>
 
       {open && (

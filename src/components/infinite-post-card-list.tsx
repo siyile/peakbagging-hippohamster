@@ -77,12 +77,14 @@ export function InfinitePostCardList({
   initialPosts,
   sort,
   tag,
+  query,
   pageSize = 10,
 }: {
   title: string;
   initialPosts: PostCard[];
-  sort: "latest" | "popular";
+  sort?: "latest" | "popular";
   tag?: string;
+  query?: string;
   pageSize?: number;
 }) {
   const [posts, setPosts] = useState<PostCard[]>(initialPosts);
@@ -102,11 +104,16 @@ export function InfinitePostCardList({
     const params = new URLSearchParams({
       offset: String(offsetRef.current),
       limit: String(pageSize),
-      sort,
     });
-    if (tag) params.set("tag", tag);
+    if (query) {
+      params.set("q", query);
+    } else {
+      params.set("sort", sort ?? "latest");
+      if (tag) params.set("tag", tag);
+    }
 
-    const res = await fetch(`/api/posts?${params}`);
+    const endpoint = query ? "/api/search" : "/api/posts";
+    const res = await fetch(`${endpoint}?${params}`);
     const data = await res.json();
 
     setPosts((prev) => [...prev, ...data.posts]);
@@ -114,7 +121,7 @@ export function InfinitePostCardList({
     hasMoreRef.current = data.hasMore;
     setHasMore(data.hasMore);
     loadingRef.current = false;
-  }, [sort, tag, pageSize]);
+  }, [sort, tag, query, pageSize]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

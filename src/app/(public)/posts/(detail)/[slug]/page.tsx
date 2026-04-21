@@ -8,7 +8,6 @@ import Link from "next/link";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { FigureImage } from "@/lib/figure-image";
-import TiptapLink from "@tiptap/extension-link";
 import { FeaturedClimbs } from "@/components/featured-climbs";
 import { BackToTop } from "@/components/back-to-top";
 import Image from "next/image";
@@ -90,7 +89,6 @@ export default async function PostPage({
   const html = generateHTML(post.content as Parameters<typeof generateHTML>[0], [
     StarterKit,
     FigureImage,
-    TiptapLink,
   ]);
 
   const jsonLd = {

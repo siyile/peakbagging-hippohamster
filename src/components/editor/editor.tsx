@@ -35,7 +35,7 @@ export default function Editor({ initialContent, editorRef, uploadPath }: Editor
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit,
+      StarterKit.configure({ link: false }),
       FigureImage.extend({
         addNodeView() {
           return ReactNodeViewRenderer(FigureNodeView);
