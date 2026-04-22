@@ -18,6 +18,11 @@ import type { Post } from "@/db/schema";
 import type { Editor as TiptapEditor, JSONContent } from "@tiptap/react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import {
+  RouteMetadataFields,
+  routeMetadataToPayload,
+  type RouteMetadataValues,
+} from "@/components/admin/route-metadata-fields";
 
 const Editor = dynamic(() => import("@/components/editor/editor"), {
   ssr: false,
@@ -51,6 +56,17 @@ export default function EditPostForm({
   const [caltopoUrl, setCaltopoUrl] = useState(post.caltopoUrl || "");
   const [peakbaggerUrl, setPeakbaggerUrl] = useState(post.peakbaggerUrl || "");
   const [nwsUrl, setNwsUrl] = useState(post.nwsUrl || "");
+  const [metadata, setMetadata] = useState<RouteMetadataValues>({
+    elevationFt: post.elevationFt != null ? String(post.elevationFt) : "",
+    elevationGainFt:
+      post.elevationGainFt != null ? String(post.elevationGainFt) : "",
+    distanceMiles: post.distanceMiles != null ? String(post.distanceMiles) : "",
+    timeCategory: post.timeCategory || "",
+    rockRating: post.rockRating != null ? String(post.rockRating) : "",
+    glacierRating: post.glacierRating || "",
+    offTrailRatio: post.offTrailRatio != null ? String(post.offTrailRatio) : "",
+    isSkiTouring: post.isSkiTouring ?? false,
+  });
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -118,7 +134,7 @@ export default function EditPostForm({
         caltopoUrl: caltopoUrl || undefined,
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
-
+        ...routeMetadataToPayload(metadata),
         tags: [
           ...tags.split(",").map((t) => t.trim()).filter(Boolean),
           ...(location ? [location] : []),
@@ -303,6 +319,8 @@ export default function EditPostForm({
           />
         </div>
       </div>
+
+      <RouteMetadataFields values={metadata} onChange={setMetadata} />
 
       <div className="space-y-2">
         <Label>Content</Label>

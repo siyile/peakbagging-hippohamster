@@ -39,7 +39,7 @@ async function syncPostTags(postId: number, tagNames: string[]) {
     .values(tagRows.map((t) => ({ postId, tagId: t.id })));
 }
 
-export async function createPost(formData: {
+export type PostFormData = {
   title: string;
   content: string;
   description?: string;
@@ -50,9 +50,19 @@ export async function createPost(formData: {
   caltopoUrl?: string;
   peakbaggerUrl?: string;
   nwsUrl?: string;
+  elevationFt?: number | null;
+  elevationGainFt?: number | null;
+  distanceMiles?: number | null;
+  timeCategory?: string | null;
+  rockRating?: number | null;
+  glacierRating?: string | null;
+  offTrailRatio?: number | null;
+  isSkiTouring?: boolean;
   tags?: string[];
   status?: string;
-}) {
+};
+
+export async function createPost(formData: PostFormData) {
   const slug = slugify(formData.title);
   const isPublished = formData.status === "published";
   const content = JSON.parse(formData.content);
@@ -71,6 +81,15 @@ export async function createPost(formData: {
       caltopoUrl: formData.caltopoUrl || null,
       peakbaggerUrl: formData.peakbaggerUrl || null,
       nwsUrl: formData.nwsUrl || null,
+      elevationFt: formData.elevationFt ?? null,
+      elevationGainFt: formData.elevationGainFt ?? null,
+      distanceMiles:
+        formData.distanceMiles != null ? String(formData.distanceMiles) : null,
+      timeCategory: formData.timeCategory || null,
+      rockRating: formData.rockRating ?? null,
+      glacierRating: formData.glacierRating || null,
+      offTrailRatio: formData.offTrailRatio ?? null,
+      isSkiTouring: formData.isSkiTouring ?? false,
       status: formData.status || "draft",
       publishedAt: isPublished ? new Date() : null,
     })
@@ -83,23 +102,7 @@ export async function createPost(formData: {
   redirect(`/admin/posts/${post.id}/edit`);
 }
 
-export async function updatePost(
-  id: number,
-  formData: {
-    title: string;
-    content: string;
-    description?: string;
-    coverImage?: string;
-    coverImageThumb?: string;
-    tripDate?: string;
-    gpxUrl?: string;
-    caltopoUrl?: string;
-    peakbaggerUrl?: string;
-    nwsUrl?: string;
-    tags?: string[];
-    status?: string;
-  }
-) {
+export async function updatePost(id: number, formData: PostFormData) {
   const slug = slugify(formData.title);
   const isPublished = formData.status === "published";
   const content = JSON.parse(formData.content);
@@ -124,6 +127,15 @@ export async function updatePost(
       caltopoUrl: formData.caltopoUrl || null,
       peakbaggerUrl: formData.peakbaggerUrl || null,
       nwsUrl: formData.nwsUrl || null,
+      elevationFt: formData.elevationFt ?? null,
+      elevationGainFt: formData.elevationGainFt ?? null,
+      distanceMiles:
+        formData.distanceMiles != null ? String(formData.distanceMiles) : null,
+      timeCategory: formData.timeCategory || null,
+      rockRating: formData.rockRating ?? null,
+      glacierRating: formData.glacierRating || null,
+      offTrailRatio: formData.offTrailRatio ?? null,
+      isSkiTouring: formData.isSkiTouring ?? false,
       status: formData.status || "draft",
       publishedAt:
         isPublished && !existing?.publishedAt

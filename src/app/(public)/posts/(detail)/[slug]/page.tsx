@@ -8,7 +8,9 @@ import Link from "next/link";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { FigureImage } from "@/lib/figure-image";
-import { FeaturedClimbs } from "@/components/featured-climbs";
+import { Recommendations } from "@/components/recommendations";
+import { TrackVisit } from "@/components/track-visit";
+import { PostMetadataBlock } from "@/components/post-metadata-block";
 import { BackToTop } from "@/components/back-to-top";
 import Image from "next/image";
 
@@ -188,14 +190,20 @@ export default async function PostPage({
             )}
         </div>
       )}
+      <PostMetadataBlock post={post} />
       <div
         className="prose dark:prose-invert max-w-none px-4 pt-0 pb-0 md:px-6 md:pt-6 text-black dark:text-white"
         dangerouslySetInnerHTML={{ __html: html }}
       />
       <BackToTop />
+      <TrackVisit slug={post.slug} />
     </article>
 
-    <FeaturedClimbs excludeId={post.id} className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-6" />
+    <Recommendations
+      currentSlug={post.slug}
+      withPhotos
+      className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-6"
+    />
     </div>
   );
 }

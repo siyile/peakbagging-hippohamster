@@ -6,6 +6,8 @@ import {
   jsonb,
   timestamp,
   integer,
+  numeric,
+  boolean,
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -23,6 +25,14 @@ export const posts = pgTable("posts", {
   caltopoUrl: varchar("caltopo_url", { length: 500 }),
   peakbaggerUrl: varchar("peakbagger_url", { length: 500 }),
   nwsUrl: varchar("nws_url", { length: 500 }),
+  elevationFt: integer("elevation_ft"),
+  elevationGainFt: integer("elevation_gain_ft"),
+  distanceMiles: numeric("distance_miles", { precision: 5, scale: 2 }),
+  timeCategory: varchar("time_category", { length: 20 }),
+  rockRating: integer("rock_rating"),
+  glacierRating: varchar("glacier_rating", { length: 4 }),
+  offTrailRatio: integer("off_trail_ratio"),
+  isSkiTouring: boolean("is_ski_touring").default(false).notNull(),
   viewCount: integer("view_count").default(0).notNull(),
   status: varchar("status", { length: 20 }).default("draft").notNull(),
   publishedAt: timestamp("published_at"),

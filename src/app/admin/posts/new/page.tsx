@@ -16,6 +16,11 @@ import { uploadImage } from "@/components/editor/image-upload";
 import { LOCATION_TAGS } from "@/lib/constants";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 import dynamic from "next/dynamic";
+import {
+  RouteMetadataFields,
+  emptyRouteMetadata,
+  routeMetadataToPayload,
+} from "@/components/admin/route-metadata-fields";
 
 const Editor = dynamic(() => import("@/components/editor/editor"), {
   ssr: false,
@@ -42,6 +47,7 @@ export default function NewPostPage() {
   const [caltopoUrl, setCaltopoUrl] = useState("");
   const [peakbaggerUrl, setPeakbaggerUrl] = useState("");
   const [nwsUrl, setNwsUrl] = useState("");
+  const [metadata, setMetadata] = useState(emptyRouteMetadata());
   const [saving, setSaving] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingGpx, setUploadingGpx] = useState(false);
@@ -109,7 +115,7 @@ export default function NewPostPage() {
         caltopoUrl: caltopoUrl || undefined,
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
-
+        ...routeMetadataToPayload(metadata),
         tags: [
           ...tags.split(",").map((t) => t.trim()).filter(Boolean),
           ...(location ? [location] : []),
@@ -277,6 +283,8 @@ export default function NewPostPage() {
           />
         </div>
       </div>
+
+      <RouteMetadataFields values={metadata} onChange={setMetadata} />
 
       <div className="space-y-2">
         <Label>Content</Label>
