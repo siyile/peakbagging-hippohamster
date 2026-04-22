@@ -67,13 +67,21 @@ export function SearchOverlay({
     }
   }, [open]);
 
-  // Lock body scroll while overlay is open.
+  // Lock body scroll while overlay is open. Pad the body by the vanished
+  // scrollbar's width so the page behind doesn't shift right.
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    const prevOverflow = document.body.style.overflow;
+    const prevPaddingRight = document.body.style.paddingRight;
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPaddingRight;
     };
   }, [open]);
 
@@ -124,11 +132,22 @@ export function SearchOverlay({
       role="presentation"
     >
       <div
-        className="absolute inset-x-0 top-0 bg-background md:left-1/2 md:top-10 md:inset-x-auto md:w-full md:max-w-[800px] md:-translate-x-1/2 md:rounded-lg md:shadow-xl"
+        className="absolute inset-0 flex flex-col bg-background md:inset-auto md:left-1/2 md:top-10 md:block md:w-full md:max-w-[800px] md:-translate-x-1/2 md:rounded-lg md:shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <form onSubmit={submit} className="flex items-center gap-2 p-3 md:border-b md:p-3">
-          <div className="flex flex-1 items-center gap-2 rounded-full bg-muted px-4 py-2 md:rounded-md md:bg-transparent md:px-0 md:py-0">
+        <form onSubmit={submit} className="flex items-center gap-1 pl-1 p-3 md:border-b md:p-3">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Back"
+            className="shrink-0 cursor-pointer rounded-full p-2 text-muted-foreground hover:text-foreground md:hidden"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </button>
+          <div className="flex flex-1 items-center gap-2 rounded-full bg-muted py-1 pl-4 pr-2 md:rounded-md md:py-1.5">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -150,33 +169,46 @@ export function SearchOverlay({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search trip reports…"
-              className="flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-lg"
+              className="no-native-clear w-0 min-w-0 flex-1 bg-transparent text-md outline-none placeholder:text-muted-foreground"
               autoComplete="off"
             />
+            {hasQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  inputRef.current?.focus();
+                }}
+                aria-label="Clear search"
+                className="shrink-0 cursor-pointer rounded-full p-1 text-muted-foreground hover:text-foreground"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
+            <div aria-hidden className="h-5 w-px shrink-0 bg-border" />
+            <button
+              type="submit"
+              disabled={!hasQuery}
+              className="shrink-0 cursor-pointer rounded-md pl-1 pr-2 py-1 text-md font-medium text-brand hover:bg-brand hover:text-white disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand"
+            >
+              Search
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close search"
-            className="rounded-full p-2 text-muted-foreground hover:text-foreground"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
         </form>
 
-        <div className="max-h-[70vh] overflow-y-auto px-4 py-3">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 md:max-h-[70vh] md:flex-none">
           {!hasQuery && (
-            <p className="py-8 text-center text-sm text-muted-foreground">
+            <p className="py-8 text-center text-base text-muted-foreground md:text-sm">
               Start typing to search by title, tag, or description.
             </p>
           )}
 
           {showNoResults && (
             <div className="py-6 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground md:text-sm">
                 No quick matches. Press Enter to search the full text of all posts.
               </p>
             </div>
@@ -191,11 +223,11 @@ export function SearchOverlay({
                     onClick={onClose}
                     className="block py-3 hover:bg-muted/60 -mx-2 px-2 rounded"
                   >
-                    <h3 className="font-normal text-brand text-[15px] md:text-[22px]">
+                    <h3 className="font-normal text-brand text-[18px] md:text-[22px]">
                       {r.title}
                     </h3>
                     {r.description && (
-                      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground md:text-sm">
+                      <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
                         {r.description}
                       </p>
                     )}
@@ -212,7 +244,7 @@ export function SearchOverlay({
                 router.push(`/search?q=${encodeURIComponent(query.trim())}`);
                 onClose();
               }}
-              className="mt-3 w-full rounded-full border border-border py-2 text-sm font-medium text-brand hover:bg-muted md:rounded"
+              className="mt-3 w-full rounded-full border border-border py-2 text-base font-medium text-brand hover:bg-muted md:rounded md:text-sm"
             >
               See all results for “{query.trim()}” →
             </button>

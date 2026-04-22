@@ -134,6 +134,16 @@
   100% { transform: translateX(100%); }
 }
 
+/* Suppress WebKit's built-in search clear (X) so our custom button is the only one. */
+input[type="search"].no-native-clear::-webkit-search-cancel-button,
+input[type="search"].no-native-clear::-webkit-search-decoration,
+input[type="search"].no-native-clear::-webkit-search-results-button,
+input[type="search"].no-native-clear::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
 .tiptap {
   min-height: 300px;
   outline: none;
