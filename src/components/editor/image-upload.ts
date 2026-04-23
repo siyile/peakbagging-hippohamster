@@ -8,8 +8,6 @@ export async function uploadImage(
   if (opts?.slug) formData.append("slug", opts.slug);
   if (opts?.cover) formData.append("cover", "true");
 
-  console.log("[image-upload] uploading file:", file.name, file.type, file.size);
-
   const res = await fetch("/api/upload", {
     method: "POST",
     body: formData,
@@ -22,10 +20,8 @@ export async function uploadImage(
   }
 
   const data = await res.json();
-  console.log("[image-upload] response:", data);
 
   if (!data.url) {
-    console.error("[image-upload] no url in response:", data);
     throw new Error("No URL returned");
   }
 

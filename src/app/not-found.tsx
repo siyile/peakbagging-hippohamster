@@ -8,7 +8,7 @@ export default function NotFound() {
         <Image src="/logo.png" alt="HippoHamster" width={80} height={80} />
         <div className="h-24 w-px bg-border" />
         <div>
-          <h1 className="text-2xl font-bold">This page couldn't be found</h1>
+          <h1 className="text-2xl font-bold">This page couldn&rsquo;t be found</h1>
           <Link href="/" className="mt-2 inline-block text-brand hover:underline">
             Go back to home
           </Link>

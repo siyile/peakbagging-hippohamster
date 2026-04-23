@@ -7,8 +7,6 @@ export const TIME_CATEGORIES = [
   { value: "4_days", label: "4 days", climbHours: 32, tripDays: 4 },
 ] as const;
 
-export type TimeCategory = (typeof TIME_CATEGORIES)[number]["value"];
-
 export const ROCK_RATINGS = [
   { value: 1, label: "Class 1" },
   { value: 2, label: "Class 2" },
@@ -33,8 +31,6 @@ export const GLACIER_RATINGS = [
   { value: "II", score: 2 },
   { value: "III", score: 3 },
 ] as const;
-
-export type GlacierRating = (typeof GLACIER_RATINGS)[number]["value"];
 
 export const OFF_TRAIL_RATIOS = [20, 40, 60, 80, 100] as const;
 

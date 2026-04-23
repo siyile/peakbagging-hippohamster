@@ -19,12 +19,12 @@ export default function AboutPage() {
           <div>
             <h1 className="text-4xl font-bold text-brand-grey text-center mb-6">About Us</h1>
             <article className="prose dark:prose-invert max-w-none text-black dark:text-white">
-              <p>Welcome to Siyi🦛 (Hippo) and Chutang🐹 (Hamster)'s alpine adventures!</p>
+              <p>Welcome to Siyi🦛 (Hippo) and Chutang🐹 (Hamster)&rsquo;s alpine adventures!</p>
               <h3>Start of Our Journey</h3>
               <p>We moved to the Seattle area at the beginning of 2021 and started hiking and backpacking around the PNW. With the goal of climbing Mount Rainier unguided, we applied for the Mountaineers basic climbing course in 2022. Got rejected lol. So we both took the scramble course in 2022 instead, then basic climbing in 2024, and lead on trad in 2025. Siyi is taking winter mountaineering and crevasse rescue in 2026. Somewhere along the way we fell in love with the Cascades, from hiking to backpacking, from rock to glacier, and just gradually became outdoor people.</p>
               <h3>Our Website</h3>
-              <p>You'll find detailed, photo heavy route beta here. We try to provide the best beta for every route we take. There are trip reports out there, but we like to illustrate the crux with actual photos so you can go in with more confidence! Our peaks and routes mostly cover popular lists like the Bulger List and Smoot List.</p>
-              <p>Thanks for reading! Hope you're also enjoying the mountains!</p>
+              <p>You&rsquo;ll find detailed, photo heavy route beta here. We try to provide the best beta for every route we take. There are trip reports out there, but we like to illustrate the crux with actual photos so you can go in with more confidence! Our peaks and routes mostly cover popular lists like the Bulger List and Smoot List.</p>
+              <p>Thanks for reading! Hope you&rsquo;re also enjoying the mountains!</p>
             </article>
           </div>
           <figure className="mt-6 md:mt-0 md:w-[300px]">

@@ -14,18 +14,20 @@ export function PopularClimbs({
   posts,
   withPhotos = false,
   className,
+  endMarker,
 }: {
   title?: string;
   posts: PopularPost[];
   withPhotos?: boolean;
   className?: string;
+  endMarker?: string;
 }) {
   if (posts.length === 0) return null;
 
   if (withPhotos) {
     return (
       <aside className={className}>
-        <h2 className="text-3xl font-semibold text-brand-grey mt-2">{title}</h2>
+        <h2 className="text-3xl font-semibold text-brand-grey mt-2 md:mt-0">{title}</h2>
         <div className="mt-3 space-y-4">
           {posts.map((post) => (
             <Link
@@ -53,6 +55,11 @@ export function PopularClimbs({
             </Link>
           ))}
         </div>
+        {endMarker && (
+          <p className="md:hidden text-center text-muted-foreground py-6">
+            — {endMarker} —
+          </p>
+        )}
       </aside>
     );
   }

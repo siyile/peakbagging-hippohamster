@@ -12,7 +12,6 @@ import {
   real,
   index,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 
 export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
@@ -78,20 +77,4 @@ export const postSimilarities = pgTable(
   ]
 );
 
-export const postsRelations = relations(posts, ({ many }) => ({
-  postTags: many(postTags),
-}));
-
-export const tagsRelations = relations(tags, ({ many }) => ({
-  postTags: many(postTags),
-}));
-
-export const postTagsRelations = relations(postTags, ({ one }) => ({
-  post: one(posts, { fields: [postTags.postId], references: [posts.id] }),
-  tag: one(tags, { fields: [postTags.tagId], references: [tags.id] }),
-}));
-
 export type Post = typeof posts.$inferSelect;
-export type NewPost = typeof posts.$inferInsert;
-export type Tag = typeof tags.$inferSelect;
-export type PostTag = typeof postTags.$inferSelect;

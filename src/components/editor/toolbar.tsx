@@ -93,10 +93,7 @@ export function EditorToolbar({ editor, uploadPath }: { editor: Editor; uploadPa
       if (!file) return;
       try {
         const { url } = await uploadImage(file, uploadPathRef.current);
-        console.log("[toolbar] inserting image with url:", url);
-        const result = editor.chain().focus().setImage({ src: url }).run();
-        console.log("[toolbar] setImage result:", result);
-        console.log("[toolbar] editor JSON after insert:", JSON.stringify(editor.getJSON()));
+        editor.chain().focus().setImage({ src: url }).run();
       } catch (err) {
         console.error("[toolbar] image upload error:", err);
       }

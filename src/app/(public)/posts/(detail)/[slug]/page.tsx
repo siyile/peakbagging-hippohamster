@@ -202,9 +202,10 @@ export default async function PostPage({
     </article>
 
     <PopularClimbs
-      posts={related.posts}
+      posts={related}
       withPhotos
-      className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-6"
+      className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-0"
+      endMarker="You've reached the end"
     />
     </div>
   );

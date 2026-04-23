@@ -18,11 +18,6 @@ export interface RecommendedPost {
   coverImageThumb: string | null;
 }
 
-export interface RecommendationsResult {
-  posts: RecommendedPost[];
-  isFallback: boolean;
-}
-
 const LOCATION_SET = new Set<string>(LOCATION_TAGS);
 
 const WEIGHTS = {
@@ -269,12 +264,12 @@ export async function computeAllSimilarities(): Promise<SimilarityRow[]> {
 async function popularFallback(
   limit: number,
   excludeIds: number[]
-): Promise<RecommendationsResult> {
+): Promise<RecommendedPost[]> {
   const where = excludeIds.length
     ? and(eq(posts.status, "published"), notInArray(posts.id, excludeIds))
     : eq(posts.status, "published");
 
-  const rows = await db
+  return db
     .select({
       title: posts.title,
       slug: posts.slug,
@@ -286,14 +281,12 @@ async function popularFallback(
     .where(where)
     .orderBy(desc(posts.viewCount))
     .limit(limit);
-
-  return { posts: rows, isFallback: true };
 }
 
 export async function getRelatedPosts(
   slug: string,
   limit = 5
-): Promise<RecommendationsResult> {
+): Promise<RecommendedPost[]> {
   const [seed] = await db
     .select({ id: posts.id })
     .from(posts)
@@ -323,5 +316,5 @@ export async function getRelatedPosts(
 
   if (rows.length === 0) return popularFallback(limit, [seed.id]);
 
-  return { posts: rows, isFallback: false };
+  return rows;
 }

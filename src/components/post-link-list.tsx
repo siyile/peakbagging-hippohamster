@@ -13,14 +13,10 @@ export function PostLinkList({
   title,
   posts,
   readMoreHref,
-  moreHref,
-  moreLabel,
 }: {
   title: string;
   posts: PostLink[];
   readMoreHref?: string;
-  moreHref?: string;
-  moreLabel?: string;
 }) {
   return (
     <>
@@ -78,14 +74,6 @@ export function PostLinkList({
             </Link>
           ))}
         </div>
-        {moreHref && (
-          <Link
-            href={moreHref}
-            className="mt-2 inline-block text-brand font-medium underline"
-          >
-            {moreLabel || "Read More"} &gt;
-          </Link>
-        )}
       </div>
     </>
   );

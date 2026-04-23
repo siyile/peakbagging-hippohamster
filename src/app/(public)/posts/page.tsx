@@ -4,7 +4,6 @@ import { desc, eq } from "drizzle-orm";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
 import { InfinitePostCardList } from "@/components/infinite-post-card-list";
-import { PostCardList } from "@/components/post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
 
 export const metadata = {

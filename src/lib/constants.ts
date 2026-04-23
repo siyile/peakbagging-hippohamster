@@ -7,5 +7,3 @@ export const LOCATION_TAGS = [
   "South Cascades",
   "Index Area",
 ] as const;
-
-export type LocationTag = (typeof LOCATION_TAGS)[number];
