@@ -8,8 +8,8 @@ import Link from "next/link";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { FigureImage } from "@/lib/figure-image";
-import { Recommendations } from "@/components/recommendations";
-import { TrackVisit } from "@/components/track-visit";
+import { PopularClimbs } from "@/components/popular-climbs";
+import { getRelatedPosts } from "@/lib/recommendations";
 import { PostMetadataBlock } from "@/components/post-metadata-block";
 import { BackToTop } from "@/components/back-to-top";
 import Image from "next/image";
@@ -81,11 +81,14 @@ export default async function PostPage({
     .where(eq(posts.id, post.id))
     .execute();
 
-  const postTagRows = await db
-    .select({ name: tags.name })
-    .from(postTags)
-    .innerJoin(tags, eq(postTags.tagId, tags.id))
-    .where(eq(postTags.postId, post.id));
+  const [postTagRows, related] = await Promise.all([
+    db
+      .select({ name: tags.name })
+      .from(postTags)
+      .innerJoin(tags, eq(postTags.tagId, tags.id))
+      .where(eq(postTags.postId, post.id)),
+    getRelatedPosts(post.slug, 5),
+  ]);
   const postTagNames = postTagRows.map((r) => r.name);
 
   const html = generateHTML(post.content as Parameters<typeof generateHTML>[0], [
@@ -196,11 +199,10 @@ export default async function PostPage({
         dangerouslySetInnerHTML={{ __html: html }}
       />
       <BackToTop />
-      <TrackVisit slug={post.slug} />
     </article>
 
-    <Recommendations
-      mode={{ kind: "post", slug: post.slug }}
+    <PopularClimbs
+      posts={related.posts}
       withPhotos
       className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-6"
     />

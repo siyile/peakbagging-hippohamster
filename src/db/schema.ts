@@ -9,6 +9,8 @@ import {
   numeric,
   boolean,
   primaryKey,
+  real,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -56,6 +58,24 @@ export const postTags = pgTable(
       .references(() => tags.id, { onDelete: "cascade" }),
   },
   (t) => [primaryKey({ columns: [t.postId, t.tagId] })]
+);
+
+export const postSimilarities = pgTable(
+  "post_similarities",
+  {
+    postId: integer("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    neighborId: integer("neighbor_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    score: real("score").notNull(),
+    rank: integer("rank").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.postId, t.neighborId] }),
+    index("post_similarities_post_rank_idx").on(t.postId, t.rank),
+  ]
 );
 
 export const postsRelations = relations(posts, ({ many }) => ({

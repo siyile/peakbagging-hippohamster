@@ -4,7 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
 import { InfinitePostCardList } from "@/components/infinite-post-card-list";
-import { Recommendations } from "@/components/recommendations";
+import { PopularClimbs } from "@/components/popular-climbs";
 
 export const metadata = {
   title: "Home",
@@ -15,7 +15,7 @@ export const metadata = {
 const PAGE_SIZE = 10;
 
 export default async function HomePage() {
-  const [latestPosts, popularFallback] = await Promise.all([
+  const [latestPosts, popularPosts] = await Promise.all([
     db
       .select({
         title: posts.title,
@@ -48,7 +48,7 @@ export default async function HomePage() {
       <HeroBanner />
       <NavBar />
 
-      {/* Desktop: Latest Climbs + Recommendations */}
+      {/* Desktop: Latest Climbs + Featured */}
       <div className="hidden md:grid grid-cols-[2fr_auto_1fr] gap-8 mt-4">
         <InfinitePostCardList
           title="Latest Climbs"
@@ -57,19 +57,12 @@ export default async function HomePage() {
           pageSize={PAGE_SIZE}
         />
         <div className="w-px bg-border" />
-        <Recommendations
-          mode={{ kind: "home" }}
-          fallbackPosts={popularFallback}
-        />
+        <PopularClimbs posts={popularPosts} />
       </div>
 
       {/* Mobile: Featured (with photos) on top, Latest below with infinite scroll */}
       <div className="md:hidden px-4 space-y-3">
-        <Recommendations
-          mode={{ kind: "home" }}
-          withPhotos
-          fallbackPosts={popularFallback.slice(0, 4)}
-        />
+        <PopularClimbs posts={popularPosts.slice(0, 4)} withPhotos />
         <div className="-mx-4 border-t border-gray-300" />
         <InfinitePostCardList
           title="Latest Climbs"

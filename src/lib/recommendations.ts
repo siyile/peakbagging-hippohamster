@@ -1,8 +1,6 @@
-"use server";
-
 import { db } from "@/db";
-import { posts, tags, postTags } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { posts, tags, postTags, postSimilarities } from "@/db/schema";
+import { and, asc, desc, eq, notInArray } from "drizzle-orm";
 import {
   timeCategoryHours,
   timeCategoryDays,
@@ -20,6 +18,11 @@ export interface RecommendedPost {
   coverImageThumb: string | null;
 }
 
+export interface RecommendationsResult {
+  posts: RecommendedPost[];
+  isFallback: boolean;
+}
+
 const LOCATION_SET = new Set<string>(LOCATION_TAGS);
 
 const WEIGHTS = {
@@ -35,10 +38,6 @@ const WEIGHTS = {
   climbHours: 0.2,
   tripDays: 0.2,
 };
-
-// Minimum average similarity a candidate must reach to be shown.
-// Below this, recommendations fall back to popular posts.
-const DEFAULT_MIN_SCORE = 0.3;
 
 type NumericKey =
   | "elevation"
@@ -60,6 +59,9 @@ const NUMERIC_WEIGHTS: Record<NumericKey, number> = {
   glacier: WEIGHTS.glacier,
   offTrail: WEIGHTS.offTrail,
 };
+
+const MIN_SCORE = 0.3;
+const TOP_N = 10;
 
 interface PostFeatures {
   id: number;
@@ -121,7 +123,7 @@ async function loadPostFeatures(): Promise<PostFeatures[]> {
     s.add(t.tagName);
   }
 
-  const result = rows.map((r): PostFeatures => {
+  return rows.map((r): PostFeatures => {
     const distanceMiles =
       r.distanceMiles != null ? Number(r.distanceMiles) : null;
     return {
@@ -145,16 +147,6 @@ async function loadPostFeatures(): Promise<PostFeatures[]> {
       locations: locationsByPost.get(r.id) ?? new Set(),
     };
   });
-
-  return result;
-}
-
-function matchesTag(p: PostFeatures, tagFilter: string): boolean {
-  const lower = tagFilter.toLowerCase();
-  return (
-    Array.from(p.tags).some((t) => t.toLowerCase() === lower) ||
-    Array.from(p.locations).some((t) => t.toLowerCase() === lower)
-  );
 }
 
 function computeStats(
@@ -171,92 +163,74 @@ function computeStats(
   return { mean, stddev };
 }
 
-function centroid(seen: PostFeatures[]): {
-  numeric: Partial<Record<NumericKey, number>>;
-  skiTouringFrac: number | null;
-  tagSet: Set<string>;
-  locationSet: Set<string>;
-} {
-  const numeric: Partial<Record<NumericKey, number>> = {};
-  const keys = Object.keys(NUMERIC_WEIGHTS) as NumericKey[];
-  for (const k of keys) {
-    const vals = seen.map((p) => p[k]).filter((v): v is number => v != null);
-    if (vals.length > 0) {
-      numeric[k] = vals.reduce((s, v) => s + v, 0) / vals.length;
-    }
-  }
-  const tagSet = new Set<string>();
-  const locationSet = new Set<string>();
-  for (const p of seen) {
-    for (const t of p.tags) tagSet.add(t);
-    for (const l of p.locations) locationSet.add(l);
-  }
-  const skiTouringFrac = seen.length
-    ? seen.filter((p) => p.isSkiTouring).length / seen.length
-    : null;
-  return { numeric, skiTouringFrac, tagSet, locationSet };
+function jaccard(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 && b.size === 0) return 0;
+  let intersection = 0;
+  for (const v of a) if (b.has(v)) intersection++;
+  const union = a.size + b.size - intersection;
+  return union === 0 ? 0 : intersection / union;
 }
 
-function hasAnyFeature(ps: PostFeatures[]): boolean {
-  return ps.some(
-    (p) =>
-      p.elevation != null ||
-      p.effortGain != null ||
-      p.distance != null ||
-      p.climbHours != null ||
-      p.rock != null ||
-      p.glacier != null ||
-      p.offTrail != null ||
-      p.tags.size > 0 ||
-      p.locations.size > 0
+function hasAnyFeature(p: PostFeatures): boolean {
+  return (
+    p.elevation != null ||
+    p.effortGain != null ||
+    p.distance != null ||
+    p.climbHours != null ||
+    p.rock != null ||
+    p.glacier != null ||
+    p.offTrail != null ||
+    p.tags.size > 0 ||
+    p.locations.size > 0
   );
 }
 
-function toRecommendedPost(p: PostFeatures): RecommendedPost {
-  return {
-    title: p.title,
-    slug: p.slug,
-    description: p.description,
-    coverImage: p.coverImage,
-    coverImageThumb: p.coverImageThumb,
-  };
+function scorePair(
+  seed: PostFeatures,
+  cand: PostFeatures,
+  statsByKey: Partial<Record<NumericKey, { mean: number; stddev: number }>>
+): number {
+  let weightedSum = 0;
+  let totalWeight = 0;
+
+  for (const k of Object.keys(NUMERIC_WEIGHTS) as NumericKey[]) {
+    const sv = seed[k];
+    const cv = cand[k];
+    const st = statsByKey[k];
+    if (sv == null || cv == null || !st) continue;
+    const dist = Math.abs(cv - sv) / st.stddev;
+    const sim = Math.exp(-dist);
+    weightedSum += NUMERIC_WEIGHTS[k] * sim;
+    totalWeight += NUMERIC_WEIGHTS[k];
+  }
+
+  // Ski touring is always present (boolean), so always contribute.
+  const skiSim = seed.isSkiTouring === cand.isSkiTouring ? 1 : 0;
+  weightedSum += WEIGHTS.skiTouring * skiSim;
+  totalWeight += WEIGHTS.skiTouring;
+
+  if (seed.locations.size > 0 && cand.locations.size > 0) {
+    weightedSum += WEIGHTS.location * jaccard(seed.locations, cand.locations);
+    totalWeight += WEIGHTS.location;
+  }
+
+  if (seed.tags.size > 0 && cand.tags.size > 0) {
+    weightedSum += WEIGHTS.tag * jaccard(seed.tags, cand.tags);
+    totalWeight += WEIGHTS.tag;
+  }
+
+  return totalWeight === 0 ? 0 : weightedSum / totalWeight;
 }
 
-export interface RecommendationsResult {
-  posts: RecommendedPost[];
-  isFallback: boolean;
+export interface SimilarityRow {
+  postId: number;
+  neighborId: number;
+  score: number;
+  rank: number;
 }
 
-export async function getRecommendations({
-  seedSlugs,
-  tagFilter,
-  limit = 5,
-  minScore = DEFAULT_MIN_SCORE,
-}: {
-  seedSlugs: string[];
-  tagFilter?: string;
-  limit?: number;
-  minScore?: number;
-}): Promise<RecommendationsResult> {
+export async function computeAllSimilarities(): Promise<SimilarityRow[]> {
   const all = await loadPostFeatures();
-  const seedSet = new Set(seedSlugs);
-  const seen = all.filter((p) => seedSet.has(p.slug));
-  const candidates = all.filter(
-    (p) => !seedSet.has(p.slug) && (!tagFilter || matchesTag(p, tagFilter))
-  );
-
-  const popularFallback = (): RecommendationsResult => ({
-    posts: candidates
-      .sort((a, b) => b.viewCount - a.viewCount)
-      .slice(0, limit)
-      .map(toRecommendedPost),
-    isFallback: true,
-  });
-
-  if (seen.length === 0 || !hasAnyFeature(seen)) {
-    return popularFallback();
-  }
-
   const statsByKey: Partial<
     Record<NumericKey, { mean: number; stddev: number }>
   > = {};
@@ -265,62 +239,89 @@ export async function getRecommendations({
     if (s) statsByKey[k] = s;
   }
 
-  const c = centroid(seen);
+  const out: SimilarityRow[] = [];
+  for (const seed of all) {
+    if (!hasAnyFeature(seed)) continue;
 
-  const scored = candidates.map((cand) => {
-    let weightedSum = 0;
-    let totalWeight = 0;
+    const scored = all
+      .filter((p) => p.id !== seed.id)
+      .map((cand) => ({ cand, score: scorePair(seed, cand, statsByKey) }))
+      .filter((s) => s.score >= MIN_SCORE)
+      .sort((a, b) =>
+        b.score !== a.score
+          ? b.score - a.score
+          : b.cand.viewCount - a.cand.viewCount
+      )
+      .slice(0, TOP_N);
 
-    for (const k of Object.keys(NUMERIC_WEIGHTS) as NumericKey[]) {
-      const cVal = c.numeric[k];
-      const candVal = cand[k];
-      const st = statsByKey[k];
-      if (cVal == null || candVal == null || !st) continue;
-      const dist = Math.abs(candVal - cVal) / st.stddev;
-      const sim = Math.exp(-dist);
-      weightedSum += NUMERIC_WEIGHTS[k] * sim;
-      totalWeight += NUMERIC_WEIGHTS[k];
-    }
-
-    if (c.skiTouringFrac != null) {
-      const sim = 1 - Math.abs((cand.isSkiTouring ? 1 : 0) - c.skiTouringFrac);
-      weightedSum += WEIGHTS.skiTouring * sim;
-      totalWeight += WEIGHTS.skiTouring;
-    }
-
-    if (c.locationSet.size > 0 && cand.locations.size > 0) {
-      let intersection = 0;
-      for (const t of cand.locations) if (c.locationSet.has(t)) intersection++;
-      const union = c.locationSet.size + cand.locations.size - intersection;
-      const jaccard = union === 0 ? 0 : intersection / union;
-      weightedSum += WEIGHTS.location * jaccard;
-      totalWeight += WEIGHTS.location;
-    }
-
-    if (c.tagSet.size > 0 && cand.tags.size > 0) {
-      let intersection = 0;
-      for (const t of cand.tags) if (c.tagSet.has(t)) intersection++;
-      const union = c.tagSet.size + cand.tags.size - intersection;
-      const jaccard = union === 0 ? 0 : intersection / union;
-      weightedSum += WEIGHTS.tag * jaccard;
-      totalWeight += WEIGHTS.tag;
-    }
-
-    const score = totalWeight === 0 ? 0 : weightedSum / totalWeight;
-    return { cand, score };
-  });
-
-  scored.sort((a, b) =>
-    b.score !== a.score ? b.score - a.score : b.cand.viewCount - a.cand.viewCount
-  );
-
-  const qualifying = scored.filter((s) => s.score >= minScore);
-  if (qualifying.length === 0) {
-    return popularFallback();
+    scored.forEach(({ cand, score }, i) => {
+      out.push({
+        postId: seed.id,
+        neighborId: cand.id,
+        score,
+        rank: i + 1,
+      });
+    });
   }
+  return out;
+}
 
-  return {
-    posts: qualifying.slice(0, limit).map((s) => toRecommendedPost(s.cand)),
-    isFallback: false,
-  };
+async function popularFallback(
+  limit: number,
+  excludeIds: number[]
+): Promise<RecommendationsResult> {
+  const where = excludeIds.length
+    ? and(eq(posts.status, "published"), notInArray(posts.id, excludeIds))
+    : eq(posts.status, "published");
+
+  const rows = await db
+    .select({
+      title: posts.title,
+      slug: posts.slug,
+      description: posts.description,
+      coverImage: posts.coverImage,
+      coverImageThumb: posts.coverImageThumb,
+    })
+    .from(posts)
+    .where(where)
+    .orderBy(desc(posts.viewCount))
+    .limit(limit);
+
+  return { posts: rows, isFallback: true };
+}
+
+export async function getRelatedPosts(
+  slug: string,
+  limit = 5
+): Promise<RecommendationsResult> {
+  const [seed] = await db
+    .select({ id: posts.id })
+    .from(posts)
+    .where(eq(posts.slug, slug))
+    .limit(1);
+
+  if (!seed) return popularFallback(limit, []);
+
+  const rows = await db
+    .select({
+      title: posts.title,
+      slug: posts.slug,
+      description: posts.description,
+      coverImage: posts.coverImage,
+      coverImageThumb: posts.coverImageThumb,
+    })
+    .from(postSimilarities)
+    .innerJoin(posts, eq(posts.id, postSimilarities.neighborId))
+    .where(
+      and(
+        eq(postSimilarities.postId, seed.id),
+        eq(posts.status, "published")
+      )
+    )
+    .orderBy(asc(postSimilarities.rank))
+    .limit(limit);
+
+  if (rows.length === 0) return popularFallback(limit, [seed.id]);
+
+  return { posts: rows, isFallback: false };
 }

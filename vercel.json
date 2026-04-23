@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/recompute-similarities",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}
