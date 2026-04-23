@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SearchOverlay } from "./search-overlay";
 
 export function SearchButton({
@@ -11,11 +11,17 @@ export function SearchButton({
   ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          // Focus must be called synchronously inside the user gesture,
+          // otherwise iOS Safari refuses to open the soft keyboard.
+          inputRef.current?.focus();
+          setOpen(true);
+        }}
         aria-label={ariaLabel}
         className={className}
       >
@@ -34,7 +40,11 @@ export function SearchButton({
           <path d="m21 21-4.3-4.3" />
         </svg>
       </button>
-      <SearchOverlay open={open} onClose={() => setOpen(false)} />
+      <SearchOverlay
+        open={open}
+        onClose={() => setOpen(false)}
+        inputRef={inputRef}
+      />
     </>
   );
 }

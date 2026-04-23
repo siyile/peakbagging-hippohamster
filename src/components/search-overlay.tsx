@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type Fuse from "fuse.js";
@@ -27,12 +27,13 @@ const FUSE_OPTIONS = {
 export function SearchOverlay({
   open,
   onClose,
+  inputRef,
 }: {
   open: boolean;
   onClose: () => void;
+  inputRef: RefObject<HTMLInputElement | null>;
 }) {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
   const fuseRef = useRef<Fuse<IndexEntry> | null>(null);
   const [indexLoaded, setIndexLoaded] = useState(false);
   const [query, setQuery] = useState("");
@@ -57,15 +58,14 @@ export function SearchOverlay({
     };
   }, [open]);
 
-  // Focus the input on open, blur/clear on close.
+  // Focusing happens synchronously in the parent's click handler so iOS
+  // opens the soft keyboard. Here we only handle close-side cleanup.
   useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 10);
-    } else {
-      setQuery("");
-      setResults([]);
-    }
-  }, [open]);
+    if (open) return;
+    inputRef.current?.blur();
+    setQuery("");
+    setResults([]);
+  }, [open, inputRef]);
 
   // Lock body scroll while overlay is open. Pad the body by the vanished
   // scrollbar's width so the page behind doesn't shift right.
@@ -123,13 +123,14 @@ export function SearchOverlay({
     [hasQuery, indexLoaded, results.length]
   );
 
-  if (!open) return null;
-
   return (
     <div
-      className="fixed inset-0 z-[100] bg-background md:bg-black/50"
+      className={`fixed inset-0 z-[100] bg-background md:bg-black/50 ${
+        open ? "" : "pointer-events-none opacity-0"
+      }`}
       onClick={onClose}
       role="presentation"
+      aria-hidden={!open}
     >
       <div
         className="absolute inset-0 flex flex-col bg-background md:inset-auto md:left-1/2 md:top-10 md:block md:w-full md:max-w-[800px] md:-translate-x-1/2 md:rounded-lg md:shadow-xl"

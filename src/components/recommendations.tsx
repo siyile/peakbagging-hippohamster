@@ -13,54 +13,104 @@ type State =
   | { status: "loading" }
   | { status: "done"; posts: RecommendedPost[] };
 
+const EMPTY_STATE: State = { status: "done", posts: [] };
+
 const TITLE = "Featured Climbs";
 
-export function Recommendations({
-  tagFilter,
-  currentSlug,
-  limit = 5,
-  className,
-  withPhotos = false,
-}: {
-  tagFilter?: string;
-  currentSlug?: string;
+const HOME_MIN_VISITS = 3;
+
+type Mode =
+  | { kind: "home" }
+  | { kind: "post"; slug: string }
+  | { kind: "tag"; tag: string };
+
+type Props = {
+  mode: Mode;
   limit?: number;
   className?: string;
   withPhotos?: boolean;
-}) {
-  const [state, setState] = useState<State>({ status: "loading" });
+  // Shown when the recommendation seed isn't available yet (home mode below
+  // the visit threshold, tag mode with no history). Ignored in post mode.
+  fallbackPosts?: RecommendedPost[];
+};
+
+export function Recommendations({
+  mode,
+  limit = 5,
+  className,
+  withPhotos = false,
+  fallbackPosts,
+}: Props) {
+  // Start empty so users below the visit threshold (or before localStorage
+  // reads) see nothing — no skeleton flash. We only flip to loading once we
+  // actually decide to fetch.
+  const [state, setState] = useState<State>(EMPTY_STATE);
+
+  // Pull primitives out so deps stay stable across renders.
+  const modeKind = mode.kind;
+  const modeSlug = mode.kind === "post" ? mode.slug : "";
+  const modeTag = mode.kind === "tag" ? mode.tag : "";
 
   useEffect(() => {
-    const seen = getSeenSlugs();
-    const combined = currentSlug
-      ? Array.from(new Set([currentSlug, ...seen]))
-      : seen;
     let cancelled = false;
-    getRecommendations({ seenSlugs: combined, tagFilter, limit })
-      .then((result) => {
-        if (cancelled) return;
-        setState({ status: "done", posts: result.posts });
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setState({ status: "done", posts: [] });
-      });
+
+    async function load() {
+      const seen = getSeenSlugs();
+      let seedSlugs: string[];
+      let tagFilter: string | undefined;
+
+      if (modeKind === "home") {
+        if (seen.length < HOME_MIN_VISITS) {
+          if (fallbackPosts && fallbackPosts.length > 0) {
+            setState({ status: "done", posts: fallbackPosts });
+          }
+          return;
+        }
+        seedSlugs = seen.slice(0, HOME_MIN_VISITS);
+      } else if (modeKind === "post") {
+        seedSlugs = [modeSlug];
+      } else {
+        // tag mode: relate to the most recent visit, restricted to this tag.
+        if (seen.length === 0) {
+          if (fallbackPosts && fallbackPosts.length > 0) {
+            setState({ status: "done", posts: fallbackPosts });
+          }
+          return;
+        }
+        seedSlugs = [seen[0]];
+        tagFilter = modeTag;
+      }
+
+      setState({ status: "loading" });
+      try {
+        const result = await getRecommendations({
+          seedSlugs,
+          tagFilter,
+          limit,
+        });
+        if (!cancelled) setState({ status: "done", posts: result.posts });
+      } catch {
+        if (!cancelled) setState({ status: "done", posts: [] });
+      }
+    }
+
+    load();
     return () => {
       cancelled = true;
     };
-  }, [tagFilter, currentSlug, limit]);
+  }, [modeKind, modeSlug, modeTag, limit, fallbackPosts]);
 
   if (withPhotos) {
     if (state.status === "loading") {
       return (
         <aside className={className}>
-          <h2 className="text-3xl font-bold text-brand-grey">{TITLE}</h2>
-          <div className="mt-4 space-y-4 md:space-y-8 pb-6">
+          <h2 className="text-3xl font-semibold text-brand-grey mt-2">{TITLE}</h2>
+          <div className="mt-3 space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i}>
-                <div className="h-6 w-full bg-muted rounded mb-2 animate-pulse" />
-                <div className="h-4 w-3/4 bg-muted rounded mb-2 animate-pulse" />
                 <div className="aspect-[3/2] w-full bg-muted rounded-md animate-pulse" />
+                <div className="h-6 w-full bg-muted rounded mt-1 animate-pulse" />
+                <div className="h-4 w-3/4 bg-muted rounded mt-1 animate-pulse" />
               </div>
             ))}
           </div>
@@ -70,30 +120,30 @@ export function Recommendations({
     if (state.posts.length === 0) return null;
     return (
       <aside className={className}>
-        <h2 className="text-3xl font-bold text-brand-grey">{TITLE}</h2>
-        <div className="mt-4 space-y-4 md:space-y-8 pb-6">
+        <h2 className="text-3xl font-semibold text-brand-grey mt-2">{TITLE}</h2>
+        <div className="mt-3 space-y-4">
           {state.posts.map((post) => (
             <Link
               key={post.slug}
               href={`/posts/${post.slug}`}
               className="block group"
             >
-              <h3 className="text-xl md:text-lg font-semibold text-brand transition-colors line-clamp-1">
-                {post.title}
-              </h3>
-              {post.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-                  {post.description}
-                </p>
-              )}
               {post.coverImage && (
                 <Image
                   src={post.coverImageThumb || post.coverImage}
                   alt={post.title}
                   width={600}
                   height={400}
-                  className="w-full aspect-[3/2] object-cover rounded-md mt-2"
+                  className="w-full aspect-[3/2] object-cover rounded-md"
                 />
+              )}
+              <h3 className="text-xl font-semibold text-brand mt-1">
+                {post.title}
+              </h3>
+              {post.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
+                  {post.description}
+                </p>
               )}
             </Link>
           ))}
@@ -131,7 +181,7 @@ export function Recommendations({
     );
   }
 
-  if (state.posts.length === 0) return null;
+  if (state.status !== "done" || state.posts.length === 0) return null;
 
   return (
     <aside className={className}>

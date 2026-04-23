@@ -200,7 +200,7 @@ export default async function PostPage({
     </article>
 
     <Recommendations
-      currentSlug={post.slug}
+      mode={{ kind: "post", slug: post.slug }}
       withPhotos
       className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-6"
     />

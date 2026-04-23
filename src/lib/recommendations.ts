@@ -82,7 +82,7 @@ interface PostFeatures {
   locations: Set<string>;
 }
 
-async function loadPostFeatures(tagFilter?: string): Promise<PostFeatures[]> {
+async function loadPostFeatures(): Promise<PostFeatures[]> {
   const rows = await db
     .select({
       id: posts.id,
@@ -121,7 +121,7 @@ async function loadPostFeatures(tagFilter?: string): Promise<PostFeatures[]> {
     s.add(t.tagName);
   }
 
-  let result = rows.map((r): PostFeatures => {
+  const result = rows.map((r): PostFeatures => {
     const distanceMiles =
       r.distanceMiles != null ? Number(r.distanceMiles) : null;
     return {
@@ -146,16 +146,15 @@ async function loadPostFeatures(tagFilter?: string): Promise<PostFeatures[]> {
     };
   });
 
-  if (tagFilter) {
-    const lower = tagFilter.toLowerCase();
-    result = result.filter(
-      (p) =>
-        Array.from(p.tags).some((t) => t.toLowerCase() === lower) ||
-        Array.from(p.locations).some((t) => t.toLowerCase() === lower)
-    );
-  }
-
   return result;
+}
+
+function matchesTag(p: PostFeatures, tagFilter: string): boolean {
+  const lower = tagFilter.toLowerCase();
+  return (
+    Array.from(p.tags).some((t) => t.toLowerCase() === lower) ||
+    Array.from(p.locations).some((t) => t.toLowerCase() === lower)
+  );
 }
 
 function computeStats(
@@ -229,20 +228,22 @@ export interface RecommendationsResult {
 }
 
 export async function getRecommendations({
-  seenSlugs,
+  seedSlugs,
   tagFilter,
   limit = 5,
   minScore = DEFAULT_MIN_SCORE,
 }: {
-  seenSlugs: string[];
+  seedSlugs: string[];
   tagFilter?: string;
   limit?: number;
   minScore?: number;
 }): Promise<RecommendationsResult> {
-  const all = await loadPostFeatures(tagFilter);
-  const seenSet = new Set(seenSlugs);
-  const seen = all.filter((p) => seenSet.has(p.slug));
-  const candidates = all.filter((p) => !seenSet.has(p.slug));
+  const all = await loadPostFeatures();
+  const seedSet = new Set(seedSlugs);
+  const seen = all.filter((p) => seedSet.has(p.slug));
+  const candidates = all.filter(
+    (p) => !seedSet.has(p.slug) && (!tagFilter || matchesTag(p, tagFilter))
+  );
 
   const popularFallback = (): RecommendationsResult => ({
     posts: candidates

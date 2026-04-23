@@ -1,5 +1,5 @@
 const STORAGE_KEY = "seen_posts";
-const MAX_SEEN = 1;
+const MAX_SEEN = 3;
 const TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 
 interface SeenEntry {
