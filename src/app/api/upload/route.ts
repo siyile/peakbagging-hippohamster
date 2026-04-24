@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { uploadToR2 } from "@/lib/r2";
 import { jwtVerify } from "jose";
 import sharp from "sharp";
+import {
+  simplifyGpx,
+  GPX_SIMPLIFY_TOLERANCE_KM,
+  GPX_SIMPLIFY_MIN_BYTES,
+} from "@/lib/gpx";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -33,23 +38,8 @@ export async function POST(request: Request) {
 
   const rawBuffer = Buffer.from(await file.arrayBuffer());
   const isImage = file.type.startsWith("image/");
-
-  let finalBuffer: Buffer;
-  let contentType: string;
-  let ext: string;
-
-  if (isImage) {
-    finalBuffer = await sharp(rawBuffer)
-      .resize(1600, undefined, { withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer();
-    contentType = "image/webp";
-    ext = "webp";
-  } else {
-    finalBuffer = rawBuffer;
-    contentType = file.type;
-    ext = file.name.split(".").pop() || "bin";
-  }
+  const fileExt = (file.name.split(".").pop() || "bin").toLowerCase();
+  const isGpx = fileExt === "gpx";
 
   const slugify = (s: string) =>
     s.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_]+/g, "-").replace(/-+/g, "-");
@@ -60,18 +50,50 @@ export async function POST(request: Request) {
   }
 
   const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const key = `${prefix}/${id}.${ext}`;
-  const url = await uploadToR2(finalBuffer, key, contentType);
 
-  let thumbUrl: string | undefined;
-  if (isCover && isImage) {
-    const thumbBuffer = await sharp(rawBuffer)
-      .resize(800, undefined, { withoutEnlargement: true })
-      .webp({ quality: 85 })
+  if (isImage) {
+    const finalBuffer = await sharp(rawBuffer)
+      .resize(1600, undefined, { withoutEnlargement: true })
+      .webp({ quality: 80 })
       .toBuffer();
-    const thumbKey = `${prefix}/${id}-thumb.${ext}`;
-    thumbUrl = await uploadToR2(thumbBuffer, thumbKey, contentType);
+    const contentType = "image/webp";
+    const key = `${prefix}/${id}.webp`;
+    const url = await uploadToR2(finalBuffer, key, contentType);
+
+    let thumbUrl: string | undefined;
+    if (isCover) {
+      const thumbBuffer = await sharp(rawBuffer)
+        .resize(800, undefined, { withoutEnlargement: true })
+        .webp({ quality: 85 })
+        .toBuffer();
+      const thumbKey = `${prefix}/${id}-thumb.webp`;
+      thumbUrl = await uploadToR2(thumbBuffer, thumbKey, contentType);
+    }
+
+    return NextResponse.json({ url, thumbUrl });
   }
 
-  return NextResponse.json({ url, thumbUrl });
+  if (isGpx) {
+    const contentType = "application/gpx+xml";
+    const baseName = slug ? `${slugify(slug)}-hippohamster` : id;
+    const key = `${prefix}/${baseName}.gpx`;
+    if (rawBuffer.byteLength < GPX_SIMPLIFY_MIN_BYTES) {
+      const url = await uploadToR2(rawBuffer, key, contentType);
+      return NextResponse.json({ url });
+    }
+    const simplified = Buffer.from(
+      simplifyGpx(rawBuffer.toString("utf-8"), GPX_SIMPLIFY_TOLERANCE_KM),
+      "utf-8",
+    );
+    const originalKey = `${prefix}/${baseName}-original.gpx`;
+    const [, url] = await Promise.all([
+      uploadToR2(rawBuffer, originalKey, contentType),
+      uploadToR2(simplified, key, contentType),
+    ]);
+    return NextResponse.json({ url });
+  }
+
+  const key = `${prefix}/${id}.${fileExt}`;
+  const url = await uploadToR2(rawBuffer, key, file.type);
+  return NextResponse.json({ url });
 }
