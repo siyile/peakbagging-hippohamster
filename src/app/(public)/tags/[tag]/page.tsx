@@ -74,6 +74,8 @@ export default async function TagPage({
     );
   }
 
+  const showPopular = latestPosts.length >= PAGE_SIZE;
+
   return (
     <div>
       <HeroBanner />
@@ -88,14 +90,16 @@ export default async function TagPage({
           tag={decoded}
           pageSize={PAGE_SIZE}
         />
-        <div className="w-px bg-border" />
-        <PopularClimbs posts={popularPosts} />
+        {showPopular && (
+          <>
+            <div className="w-px bg-border" />
+            <PopularClimbs posts={popularPosts} />
+          </>
+        )}
       </div>
 
-      {/* Mobile layout: 3 popular on top, then latest with infinite scroll */}
+      {/* Mobile layout */}
       <div className="md:hidden px-4 space-y-3">
-        <PopularClimbs posts={popularPosts.slice(0, 3)} withPhotos />
-        <div className="-mx-4 border-t border-gray-300" />
         <InfinitePostCardList
           title={`Latest ${decoded} Trips`}
           initialPosts={latestPosts}

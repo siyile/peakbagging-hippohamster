@@ -10,7 +10,7 @@ interface PopularPost {
 }
 
 export function PopularClimbs({
-  title = "Featured Climbs",
+  title = "Most Popular Climbs",
   posts,
   withPhotos = false,
   className,
