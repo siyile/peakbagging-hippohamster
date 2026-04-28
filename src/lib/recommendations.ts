@@ -189,10 +189,20 @@ function scorePair(
   let totalWeight = 0;
 
   for (const k of Object.keys(NUMERIC_WEIGHTS) as NumericKey[]) {
-    const sv = seed[k];
-    const cv = cand[k];
+    let sv = seed[k];
+    let cv = cand[k];
     const st = statsByKey[k];
-    if (sv == null || cv == null || !st) continue;
+    if (!st) continue;
+
+    // Rock/glacier: if one post has a rating and the other doesn't, treat the
+    // missing side as 0 (below Class 1 / Grade I) so a climb/glacier route is
+    // not scored as similar to one without that hazard.
+    if ((k === "rock" || k === "glacier") && (sv != null || cv != null)) {
+      sv = sv ?? 0;
+      cv = cv ?? 0;
+    }
+
+    if (sv == null || cv == null) continue;
     const dist = Math.abs(cv - sv) / st.stddev;
     const sim = Math.exp(-dist);
     weightedSum += NUMERIC_WEIGHTS[k] * sim;
