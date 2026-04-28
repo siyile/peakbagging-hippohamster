@@ -192,6 +192,14 @@ export default function EditPostForm({
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="slug">Slug (permanent)</Label>
+        <Input id="slug" value={post.slug} readOnly disabled />
+        <p className="text-xs text-muted-foreground">
+          URL: /posts/{post.slug}
+        </p>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Input
           id="description"

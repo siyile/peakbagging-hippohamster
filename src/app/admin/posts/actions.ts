@@ -6,14 +6,7 @@ import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-");
-}
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 async function syncPostTags(postId: number, tagNames: string[]) {
   // Delete existing post_tags
@@ -41,6 +34,7 @@ async function syncPostTags(postId: number, tagNames: string[]) {
 
 export type PostFormData = {
   title: string;
+  slug?: string;
   content: string;
   description?: string;
   coverImage?: string;
@@ -63,7 +57,12 @@ export type PostFormData = {
 };
 
 export async function createPost(formData: PostFormData) {
-  const slug = slugify(formData.title);
+  const slug = formData.slug?.trim() ?? "";
+  if (!SLUG_PATTERN.test(slug)) {
+    throw new Error(
+      "Slug must be lowercase letters, numbers, and hyphens only (e.g. mount-rainier-traverse)"
+    );
+  }
   const isPublished = formData.status === "published";
   const content = JSON.parse(formData.content);
 
@@ -103,12 +102,11 @@ export async function createPost(formData: PostFormData) {
 }
 
 export async function updatePost(id: number, formData: PostFormData) {
-  const slug = slugify(formData.title);
   const isPublished = formData.status === "published";
   const content = JSON.parse(formData.content);
 
   const [existing] = await db
-    .select({ publishedAt: posts.publishedAt })
+    .select({ publishedAt: posts.publishedAt, slug: posts.slug })
     .from(posts)
     .where(eq(posts.id, id))
     .limit(1);
@@ -117,7 +115,6 @@ export async function updatePost(id: number, formData: PostFormData) {
     .update(posts)
     .set({
       title: formData.title,
-      slug,
       content,
       description: formData.description || null,
       coverImage: formData.coverImage || null,
@@ -149,7 +146,7 @@ export async function updatePost(id: number, formData: PostFormData) {
 
   revalidatePath("/");
   revalidatePath("/admin/posts");
-  revalidatePath(`/posts/${slug}`);
+  if (existing?.slug) revalidatePath(`/posts/${existing.slug}`);
 }
 
 export async function deletePost(id: number) {

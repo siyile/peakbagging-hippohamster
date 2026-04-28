@@ -35,8 +35,12 @@ function slugify(text: string): string {
     .replace(/-+/g, "-");
 }
 
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 export default function NewPostPage() {
   const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [description, setExcerpt] = useState("");
   const [tags, setTags] = useState("");
   const [location, setLocation] = useState("");
@@ -53,8 +57,9 @@ export default function NewPostPage() {
   const [uploadingGpx, setUploadingGpx] = useState(false);
   const editorRef = useRef<TiptapEditor | null>(null);
 
-  const slug = slugify(title);
-  const uploadPath = title && location ? { location, slug } : undefined;
+  const effectiveSlug = slugTouched ? slug : slugify(title);
+  const uploadPath =
+    effectiveSlug && location ? { location, slug: effectiveSlug } : undefined;
 
   async function handleGpxUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -64,14 +69,14 @@ export default function NewPostPage() {
       e.target.value = "";
       return;
     }
-    if (!title || !location) {
-      alert("Please set title and location before uploading files");
+    if (!effectiveSlug || !location) {
+      alert("Please set title/slug and location before uploading files");
       e.target.value = "";
       return;
     }
     setUploadingGpx(true);
     try {
-      const { url } = await uploadImage(file, { location, slug: slugify(title) });
+      const { url } = await uploadImage(file, { location, slug: effectiveSlug });
       setGpxUrl(url);
     } finally {
       setUploadingGpx(false);
@@ -81,14 +86,14 @@ export default function NewPostPage() {
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!title || !location) {
-      alert("Please set title and location before uploading images");
+    if (!effectiveSlug || !location) {
+      alert("Please set title/slug and location before uploading images");
       e.target.value = "";
       return;
     }
     setUploadingCover(true);
     try {
-      const { url, thumbUrl } = await uploadImage(file, { location, slug: slugify(title), cover: true });
+      const { url, thumbUrl } = await uploadImage(file, { location, slug: effectiveSlug, cover: true });
       setCoverImage(url);
       if (thumbUrl) setCoverImageThumb(thumbUrl);
     } finally {
@@ -102,10 +107,17 @@ export default function NewPostPage() {
       alert("Title and location are required");
       return;
     }
+    if (!SLUG_PATTERN.test(effectiveSlug)) {
+      alert(
+        "Slug must be lowercase letters, numbers, and hyphens (e.g. mount-rainier-traverse). It cannot be changed later."
+      );
+      return;
+    }
     setSaving(true);
     try {
       await createPost({
         title,
+        slug: effectiveSlug,
         content: JSON.stringify(content),
         description: description || undefined,
         coverImage: coverImage || undefined,
@@ -153,6 +165,23 @@ export default function NewPostPage() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Post title"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="slug">Slug (permanent — cannot be changed later)</Label>
+        <Input
+          id="slug"
+          value={effectiveSlug}
+          onChange={(e) => {
+            setSlugTouched(true);
+            setSlug(e.target.value);
+          }}
+          placeholder="mount-rainier-traverse"
+          pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        />
+        <p className="text-xs text-muted-foreground">
+          Used in the URL: /posts/{effectiveSlug || "your-slug"}
+        </p>
       </div>
 
       <div className="space-y-2">
