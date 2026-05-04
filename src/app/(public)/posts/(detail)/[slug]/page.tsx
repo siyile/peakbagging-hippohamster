@@ -11,7 +11,6 @@ import { FigureImage } from "@/lib/figure-image";
 import { PopularClimbs } from "@/components/popular-climbs";
 import { getRelatedPosts } from "@/lib/recommendations";
 import { PostMetadataBlock } from "@/components/post-metadata-block";
-import { BackToTop } from "@/components/back-to-top";
 import Image from "next/image";
 
 export async function generateStaticParams() {
@@ -198,10 +197,10 @@ export default async function PostPage({
         className="prose dark:prose-invert max-w-none px-4 pt-0 pb-0 md:px-6 md:pt-6 text-black dark:text-white"
         dangerouslySetInnerHTML={{ __html: html }}
       />
-      <BackToTop />
     </article>
 
     <PopularClimbs
+      title="Recommended Climbs"
       posts={related}
       withPhotos
       className="border-t border-gray-300 pt-4 px-4 md:px-0 md:border-t-0 md:pt-0"
