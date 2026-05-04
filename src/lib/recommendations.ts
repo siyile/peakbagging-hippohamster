@@ -6,6 +6,7 @@ import {
   timeCategoryDays,
   glacierRatingScore,
   rockRatingScore,
+  snowRatingScore,
   effortGain,
 } from "./post-metadata";
 import { LOCATION_TAGS } from "./constants";
@@ -25,6 +26,7 @@ const WEIGHTS = {
   tag: 1.0,
   rock: 0.8,
   glacier: 0.8,
+  snow: 0.8,
   skiTouring: 0.8,
   elevation: 0.4,
   effortGain: 0.2,
@@ -42,6 +44,7 @@ type NumericKey =
   | "tripDays"
   | "rock"
   | "glacier"
+  | "snow"
   | "offTrail";
 
 const NUMERIC_WEIGHTS: Record<NumericKey, number> = {
@@ -52,6 +55,7 @@ const NUMERIC_WEIGHTS: Record<NumericKey, number> = {
   tripDays: WEIGHTS.tripDays,
   rock: WEIGHTS.rock,
   glacier: WEIGHTS.glacier,
+  snow: WEIGHTS.snow,
   offTrail: WEIGHTS.offTrail,
 };
 
@@ -73,6 +77,7 @@ interface PostFeatures {
   tripDays: number | null;
   rock: number | null;
   glacier: number | null;
+  snow: number | null;
   offTrail: number | null;
   isSkiTouring: boolean;
   tags: Set<string>;
@@ -95,6 +100,7 @@ async function loadPostFeatures(): Promise<PostFeatures[]> {
       timeCategory: posts.timeCategory,
       rockRating: posts.rockRating,
       glacierRating: posts.glacierRating,
+      snowRating: posts.snowRating,
       offTrailRatio: posts.offTrailRatio,
       isSkiTouring: posts.isSkiTouring,
     })
@@ -136,6 +142,7 @@ async function loadPostFeatures(): Promise<PostFeatures[]> {
       tripDays: timeCategoryDays(r.timeCategory),
       rock: rockRatingScore(r.rockRating),
       glacier: glacierRatingScore(r.glacierRating),
+      snow: snowRatingScore(r.snowRating),
       offTrail: r.offTrailRatio,
       isSkiTouring: r.isSkiTouring,
       tags: tagsByPost.get(r.id) ?? new Set(),
@@ -174,6 +181,7 @@ function hasAnyFeature(p: PostFeatures): boolean {
     p.climbHours != null ||
     p.rock != null ||
     p.glacier != null ||
+    p.snow != null ||
     p.offTrail != null ||
     p.tags.size > 0 ||
     p.locations.size > 0
@@ -194,10 +202,13 @@ function scorePair(
     const st = statsByKey[k];
     if (!st) continue;
 
-    // Rock/glacier: if one post has a rating and the other doesn't, treat the
-    // missing side as 0 (below Class 1 / Grade I) so a climb/glacier route is
-    // not scored as similar to one without that hazard.
-    if ((k === "rock" || k === "glacier") && (sv != null || cv != null)) {
+    // Rock/glacier/snow: if one post has a rating and the other doesn't, treat
+    // the missing side as 0 (below the lowest grade) so a route with that
+    // hazard is not scored as similar to one without it.
+    if (
+      (k === "rock" || k === "glacier" || k === "snow") &&
+      (sv != null || cv != null)
+    ) {
       sv = sv ?? 0;
       cv = cv ?? 0;
     }
@@ -232,6 +243,47 @@ export interface SimilarityRow {
   neighborId: number;
   score: number;
   rank: number;
+}
+
+export interface ScoredPair {
+  seedId: number;
+  seedSlug: string;
+  seedTitle: string;
+  neighborId: number;
+  neighborSlug: string;
+  neighborTitle: string;
+  score: number;
+}
+
+// Score every directed pair with no MIN_SCORE filter and no top-N slice.
+// Used by analysis scripts; not used by the cron.
+export async function scoreAllPairs(): Promise<ScoredPair[]> {
+  const all = await loadPostFeatures();
+  const statsByKey: Partial<
+    Record<NumericKey, { mean: number; stddev: number }>
+  > = {};
+  for (const k of Object.keys(NUMERIC_WEIGHTS) as NumericKey[]) {
+    const s = computeStats(all, k);
+    if (s) statsByKey[k] = s;
+  }
+
+  const out: ScoredPair[] = [];
+  for (const seed of all) {
+    if (!hasAnyFeature(seed)) continue;
+    for (const cand of all) {
+      if (cand.id === seed.id) continue;
+      out.push({
+        seedId: seed.id,
+        seedSlug: seed.slug,
+        seedTitle: seed.title,
+        neighborId: cand.id,
+        neighborSlug: cand.slug,
+        neighborTitle: cand.title,
+        score: scorePair(seed, cand, statsByKey),
+      });
+    }
+  }
+  return out;
 }
 
 export async function computeAllSimilarities(): Promise<SimilarityRow[]> {

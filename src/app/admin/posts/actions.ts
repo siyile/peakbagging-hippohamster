@@ -50,6 +50,7 @@ export type PostFormData = {
   timeCategory?: string | null;
   rockRating?: number | null;
   glacierRating?: string | null;
+  snowRating?: string | null;
   offTrailRatio?: number | null;
   isSkiTouring?: boolean;
   tags?: string[];
@@ -87,6 +88,7 @@ export async function createPost(formData: PostFormData) {
       timeCategory: formData.timeCategory || null,
       rockRating: formData.rockRating ?? null,
       glacierRating: formData.glacierRating || null,
+      snowRating: formData.snowRating || null,
       offTrailRatio: formData.offTrailRatio ?? null,
       isSkiTouring: formData.isSkiTouring ?? false,
       status: formData.status || "draft",
@@ -131,6 +133,7 @@ export async function updatePost(id: number, formData: PostFormData) {
       timeCategory: formData.timeCategory || null,
       rockRating: formData.rockRating ?? null,
       glacierRating: formData.glacierRating || null,
+      snowRating: formData.snowRating || null,
       offTrailRatio: formData.offTrailRatio ?? null,
       isSkiTouring: formData.isSkiTouring ?? false,
       status: formData.status || "draft",

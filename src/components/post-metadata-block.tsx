@@ -1,5 +1,9 @@
 import type { Post } from "@/db/schema";
-import { timeCategoryLabel, rockRatingLabel } from "@/lib/post-metadata";
+import {
+  timeCategoryLabel,
+  rockRatingLabel,
+  snowRatingLabel,
+} from "@/lib/post-metadata";
 
 type Metadata = Pick<
   Post,
@@ -9,6 +13,7 @@ type Metadata = Pick<
   | "timeCategory"
   | "rockRating"
   | "glacierRating"
+  | "snowRating"
 >;
 
 export function PostMetadataBlock({ post }: { post: Metadata }) {
@@ -27,6 +32,10 @@ export function PostMetadataBlock({ post }: { post: Metadata }) {
   }
   if (post.glacierRating) {
     rows.push(["Glacier Rating", post.glacierRating]);
+  }
+  const snowLabel = snowRatingLabel(post.snowRating);
+  if (snowLabel) {
+    rows.push(["Snow Rating", snowLabel]);
   }
   if (post.distanceMiles != null) {
     const miles = Number(post.distanceMiles);

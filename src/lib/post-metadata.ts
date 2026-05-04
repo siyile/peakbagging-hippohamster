@@ -32,6 +32,12 @@ export const GLACIER_RATINGS = [
   { value: "III", score: 3 },
 ] as const;
 
+export const SNOW_RATINGS = [
+  { value: "easy", label: "Easy Snow", score: 1 },
+  { value: "moderate", label: "Moderate Snow", score: 2 },
+  { value: "steep", label: "Steep Snow", score: 3 },
+] as const;
+
 export const OFF_TRAIL_RATIOS = [20, 40, 60, 80, 100] as const;
 
 export function timeCategoryHours(value: string | null | undefined): number | null {
@@ -65,6 +71,16 @@ export function rockRatingScore(value: number | null | undefined): number | null
 export function glacierRatingScore(value: string | null | undefined): number | null {
   const match = GLACIER_RATINGS.find((g) => g.value === value);
   return match ? match.score : null;
+}
+
+export function snowRatingScore(value: string | null | undefined): number | null {
+  const match = SNOW_RATINGS.find((s) => s.value === value);
+  return match ? match.score : null;
+}
+
+export function snowRatingLabel(value: string | null | undefined): string | null {
+  const match = SNOW_RATINGS.find((s) => s.value === value);
+  return match ? match.label : null;
 }
 
 // 40% off-trail → gain effectively counts 1.4× toward effort

@@ -64,6 +64,7 @@ export default function EditPostForm({
     timeCategory: post.timeCategory || "",
     rockRating: post.rockRating != null ? String(post.rockRating) : "",
     glacierRating: post.glacierRating || "",
+    snowRating: post.snowRating || "",
     offTrailRatio: post.offTrailRatio != null ? String(post.offTrailRatio) : "",
     isSkiTouring: post.isSkiTouring ?? false,
   });
@@ -74,6 +75,33 @@ export default function EditPostForm({
   const editorRef = useRef<TiptapEditor | null>(null);
 
   const uploadPath = title && location ? { location, slug: post.slug } : undefined;
+
+  const actionButtons = (
+    <div className="flex gap-2">
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => {
+          if (confirm("Discard unsaved changes?")) router.push("/admin/posts");
+        }}
+      >
+        Back
+      </Button>
+      <Button variant="destructive" size="sm" onClick={handleDelete}>
+        Delete
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => handleSave("draft")}
+        disabled={saving}
+      >
+        Save Draft
+      </Button>
+      <Button onClick={() => handleSave("published")} disabled={saving}>
+        {post.status === "published" ? "Update" : "Publish"}
+      </Button>
+    </div>
+  );
 
   async function handleGpxUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -155,30 +183,7 @@ export default function EditPostForm({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Edit Post</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              if (confirm("Discard unsaved changes?")) router.push("/admin/posts");
-            }}
-          >
-            Back
-          </Button>
-          <Button variant="destructive" size="sm" onClick={handleDelete}>
-            Delete
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleSave("draft")}
-            disabled={saving}
-          >
-            Save Draft
-          </Button>
-          <Button onClick={() => handleSave("published")} disabled={saving}>
-            {post.status === "published" ? "Update" : "Publish"}
-          </Button>
-        </div>
+        {actionButtons}
       </div>
 
       <div className="space-y-2">
@@ -338,6 +343,8 @@ export default function EditPostForm({
           uploadPath={uploadPath}
         />
       </div>
+
+      <div className="flex justify-end">{actionButtons}</div>
     </div>
   );
 }

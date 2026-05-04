@@ -13,6 +13,7 @@ import {
   TIME_CATEGORIES,
   ROCK_RATINGS,
   GLACIER_RATINGS,
+  SNOW_RATINGS,
   OFF_TRAIL_RATIOS,
 } from "@/lib/post-metadata";
 
@@ -23,6 +24,7 @@ export interface RouteMetadataValues {
   timeCategory: string;
   rockRating: string;
   glacierRating: string;
+  snowRating: string;
   offTrailRatio: string;
   isSkiTouring: boolean;
 }
@@ -141,6 +143,24 @@ export function RouteMetadataFields({
 
       <div className="grid grid-cols-3 gap-4 items-end">
         <div className="space-y-2">
+          <Label htmlFor="snowRating">Snow Rating</Label>
+          <Select
+            value={values.snowRating}
+            onValueChange={(v) => set("snowRating", v)}
+          >
+            <SelectTrigger id="snowRating">
+              <SelectValue placeholder="Select grade" />
+            </SelectTrigger>
+            <SelectContent>
+              {SNOW_RATINGS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="offTrailRatio">Off-trail Ratio</Label>
           <Select
             value={values.offTrailRatio}
@@ -183,6 +203,7 @@ export function emptyRouteMetadata(): RouteMetadataValues {
     timeCategory: "",
     rockRating: "",
     glacierRating: "",
+    snowRating: "",
     offTrailRatio: "",
     isSkiTouring: false,
   };
@@ -204,6 +225,7 @@ export function routeMetadataToPayload(values: RouteMetadataValues) {
     timeCategory: values.timeCategory || null,
     rockRating: parseInt(values.rockRating),
     glacierRating: values.glacierRating || null,
+    snowRating: values.snowRating || null,
     offTrailRatio: parseInt(values.offTrailRatio),
     isSkiTouring: values.isSkiTouring,
   };
