@@ -61,15 +61,16 @@ export default async function HomePage() {
       </div>
 
       {/* Mobile: Featured (with photos) on top, Latest below with infinite scroll */}
-      <div className="md:hidden px-4 space-y-3">
+      <div className="md:hidden px-4">
         <PopularClimbs posts={popularPosts.slice(0, 4)} withPhotos />
-        <div className="-mx-4 border-t border-gray-300" />
-        <InfinitePostCardList
-          title="Latest Climbs"
-          initialPosts={latestPosts}
-          sort="latest"
-          pageSize={PAGE_SIZE}
-        />
+        <div className="mt-4">
+          <InfinitePostCardList
+            title="Latest Climbs"
+            initialPosts={latestPosts}
+            sort="latest"
+            pageSize={PAGE_SIZE}
+          />
+        </div>
       </div>
     </div>
   );
