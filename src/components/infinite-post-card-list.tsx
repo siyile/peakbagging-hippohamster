@@ -89,6 +89,8 @@ export function InfinitePostCardList({
 }) {
   const [posts, setPosts] = useState<PostCard[]>(initialPosts);
   const [hasMore, setHasMore] = useState(initialPosts.length >= pageSize);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const mobileSentinelRef = useRef<HTMLDivElement>(null);
 
@@ -100,6 +102,8 @@ export function InfinitePostCardList({
   const fetchMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current) return;
     loadingRef.current = true;
+    setLoading(true);
+    setError(null);
 
     const params = new URLSearchParams({
       offset: String(offsetRef.current),
@@ -113,14 +117,21 @@ export function InfinitePostCardList({
     }
 
     const endpoint = query ? "/api/search" : "/api/posts";
-    const res = await fetch(`${endpoint}?${params}`);
-    const data = await res.json();
-
-    setPosts((prev) => [...prev, ...data.posts]);
-    offsetRef.current += data.posts.length;
-    hasMoreRef.current = data.hasMore;
-    setHasMore(data.hasMore);
-    loadingRef.current = false;
+    try {
+      const res = await fetch(`${endpoint}?${params}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!Array.isArray(data.posts)) throw new Error("bad response shape");
+      setPosts((prev) => [...prev, ...data.posts]);
+      offsetRef.current += data.posts.length;
+      hasMoreRef.current = data.hasMore;
+      setHasMore(data.hasMore);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      loadingRef.current = false;
+      setLoading(false);
+    }
   }, [sort, tag, query, pageSize]);
 
   useEffect(() => {
@@ -130,20 +141,52 @@ export function InfinitePostCardList({
           fetchMore();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "400px" }
     );
 
     if (sentinelRef.current) observer.observe(sentinelRef.current);
     if (mobileSentinelRef.current) observer.observe(mobileSentinelRef.current);
 
-    return () => observer.disconnect();
+    const onScroll = () => {
+      const remaining =
+        document.documentElement.scrollHeight -
+        (window.scrollY + window.innerHeight);
+      if (remaining < 600) fetchMore();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
   }, [fetchMore]);
 
-  const endMessage = !hasMore && posts.length > 0 && (
+  const statusMessage = error ? (
+    <div className="text-center py-6 space-y-2">
+      <p className="text-red-600 text-sm">Failed to load: {error}</p>
+      <button
+        onClick={fetchMore}
+        className="text-sm underline text-muted-foreground"
+      >
+        Tap to retry
+      </button>
+    </div>
+  ) : loading ? (
+    <p className="text-center text-muted-foreground py-6">Loading…</p>
+  ) : !hasMore && posts.length > 0 ? (
     <p className="text-center text-muted-foreground py-6">
       — You&apos;ve reached the end —
     </p>
-  );
+  ) : hasMore ? (
+    <div className="text-center py-6">
+      <button
+        onClick={fetchMore}
+        className="text-sm underline text-muted-foreground"
+      >
+        Load more
+      </button>
+    </div>
+  ) : null;
 
   return (
     <>
@@ -155,8 +198,8 @@ export function InfinitePostCardList({
             <PostCardDesktop key={fp.slug} fp={fp} />
           ))}
         </div>
-        {endMessage}
-        <div ref={sentinelRef} />
+        {statusMessage}
+        <div ref={sentinelRef} aria-hidden="true" className="h-1 w-full" />
       </div>
 
       {/* Mobile */}
@@ -167,8 +210,8 @@ export function InfinitePostCardList({
             <PostCardMobile key={fp.slug} fp={fp} />
           ))}
         </div>
-        {endMessage}
-        <div ref={mobileSentinelRef} />
+        {statusMessage}
+        <div ref={mobileSentinelRef} aria-hidden="true" className="h-1 w-full" />
       </div>
     </>
   );
