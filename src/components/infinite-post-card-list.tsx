@@ -32,6 +32,7 @@ function PostCardDesktop({ fp }: { fp: PostCard }) {
               month: "long",
               day: "numeric",
               year: "numeric",
+              timeZone: "UTC",
             })}{" "}
             by Siyi
           </p>

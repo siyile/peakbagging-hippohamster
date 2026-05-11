@@ -155,6 +155,7 @@ export default async function PostPage({
                 month: "long",
                 day: "numeric",
                 year: "numeric",
+                timeZone: "UTC",
               })}
             </time>
             <span>·</span>

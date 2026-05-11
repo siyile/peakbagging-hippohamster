@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { posts, tags, postTags } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -9,7 +9,7 @@ export default async function AdminPostsPage() {
   const allPosts = await db
     .select()
     .from(posts)
-    .orderBy(desc(posts.updatedAt));
+    .orderBy(sql`${posts.tripDate} desc nulls last`, sql`${posts.updatedAt} desc`);
 
   // Fetch all post-tag mappings in one query
   const allPostTags = await db
@@ -45,7 +45,14 @@ export default async function AdminPostsPage() {
               <div>
                 <h2 className="font-medium">{post.title || "Untitled"}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {new Date(post.updatedAt).toLocaleDateString()}
+                  Trip:{" "}
+                  {post.tripDate
+                    ? new Date(post.tripDate).toLocaleDateString("en-US", {
+                        timeZone: "UTC",
+                      })
+                    : "—"}
+                  {" · "}
+                  Updated: {new Date(post.updatedAt).toLocaleDateString()}
                 </p>
               </div>
               <div className="flex items-center gap-2">
