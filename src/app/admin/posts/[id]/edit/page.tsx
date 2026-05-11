@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { posts, tags, postTags } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { getFrequentTags } from "@/lib/frequent-tags";
 import EditPostForm from "./edit-form";
 
 export default async function EditPostPage({
@@ -30,5 +31,13 @@ export default async function EditPostPage({
 
   const postTagNames = postTagRows.map((r) => r.name);
 
-  return <EditPostForm post={post} tags={postTagNames} />;
+  const frequentTags = await getFrequentTags();
+
+  return (
+    <EditPostForm
+      post={post}
+      tags={postTagNames}
+      frequentTags={frequentTags}
+    />
+  );
 }

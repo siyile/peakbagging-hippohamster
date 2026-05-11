@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { updatePost, deletePost } from "../../actions";
+import { createPost } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,14 +14,12 @@ import {
 } from "@/components/ui/select";
 import { uploadImage } from "@/components/editor/image-upload";
 import { LOCATION_TAGS } from "@/lib/constants";
-import type { Post } from "@/db/schema";
-import type { Editor as TiptapEditor, JSONContent } from "@tiptap/react";
-import { useRouter } from "next/navigation";
+import type { Editor as TiptapEditor } from "@tiptap/react";
 import dynamic from "next/dynamic";
 import {
   RouteMetadataFields,
+  emptyRouteMetadata,
   routeMetadataToPayload,
-  type RouteMetadataValues,
 } from "@/components/admin/route-metadata-fields";
 import { TagPills } from "@/components/admin/tag-pills";
 
@@ -29,88 +27,45 @@ const Editor = dynamic(() => import("@/components/editor/editor"), {
   ssr: false,
 });
 
-function formatDate(d: Date | null | undefined) {
-  if (!d) return "";
-  return new Date(d).toISOString().split("T")[0];
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-");
 }
 
-export default function EditPostForm({
-  post,
-  tags: initialTags,
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export default function NewPostForm({
   frequentTags,
 }: {
-  post: Post;
-  tags: string[];
   frequentTags: string[];
 }) {
-  const [title, setTitle] = useState(post.title);
-  const [description, setDescription] = useState(post.description || "");
-  const initialLocation = initialTags.find((t) =>
-    (LOCATION_TAGS as readonly string[]).includes(t)
-  ) || "";
-  const frequentTagSet = new Set(frequentTags);
-  const initialPillTags = initialTags.filter((t) => frequentTagSet.has(t));
-  const initialTextTags = initialTags.filter(
-    (t) =>
-      !(LOCATION_TAGS as readonly string[]).includes(t) &&
-      !frequentTagSet.has(t)
-  );
-  const [tags, setTags] = useState(initialTextTags.join(", "));
-  const [pillTags, setPillTags] = useState<string[]>(initialPillTags);
-  const [location, setLocation] = useState(initialLocation);
-  const [coverImage, setCoverImage] = useState(post.coverImage || "");
-  const [coverImageThumb, setCoverImageThumb] = useState(post.coverImageThumb || "");
-  const [tripDate, setTripDate] = useState(formatDate(post.tripDate));
-  const [gpxUrl, setGpxUrl] = useState(post.gpxUrl || "");
-  const [caltopoUrl, setCaltopoUrl] = useState(post.caltopoUrl || "");
-  const [peakbaggerUrl, setPeakbaggerUrl] = useState(post.peakbaggerUrl || "");
-  const [nwsUrl, setNwsUrl] = useState(post.nwsUrl || "");
-  const [metadata, setMetadata] = useState<RouteMetadataValues>({
-    elevationFt: post.elevationFt != null ? String(post.elevationFt) : "",
-    elevationGainFt:
-      post.elevationGainFt != null ? String(post.elevationGainFt) : "",
-    distanceMiles: post.distanceMiles != null ? String(post.distanceMiles) : "",
-    timeCategory: post.timeCategory || "",
-    rockRating: post.rockRating != null ? String(post.rockRating) : "",
-    glacierRating: post.glacierRating || "",
-    snowRating: post.snowRating || "",
-    offTrailRatio: post.offTrailRatio != null ? String(post.offTrailRatio) : "",
-    isSkiTouring: post.isSkiTouring ?? false,
-  });
-  const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [description, setExcerpt] = useState("");
+  const [tags, setTags] = useState("");
+  const [pillTags, setPillTags] = useState<string[]>([]);
+  const [location, setLocation] = useState("");
+  const [coverImage, setCoverImage] = useState("");
+  const [coverImageThumb, setCoverImageThumb] = useState("");
+  const [tripDate, setTripDate] = useState("");
+  const [gpxUrl, setGpxUrl] = useState("");
+  const [caltopoUrl, setCaltopoUrl] = useState("");
+  const [peakbaggerUrl, setPeakbaggerUrl] = useState("");
+  const [nwsUrl, setNwsUrl] = useState("");
+  const [metadata, setMetadata] = useState(emptyRouteMetadata());
   const [saving, setSaving] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingGpx, setUploadingGpx] = useState(false);
   const editorRef = useRef<TiptapEditor | null>(null);
 
-  const uploadPath = title && location ? { location, slug: post.slug } : undefined;
-
-  const actionButtons = (
-    <div className="flex gap-2">
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => {
-          if (confirm("Discard unsaved changes?")) router.push("/admin/posts");
-        }}
-      >
-        Back
-      </Button>
-      <Button variant="destructive" size="sm" onClick={handleDelete}>
-        Delete
-      </Button>
-      <Button
-        variant="outline"
-        onClick={() => handleSave("draft")}
-        disabled={saving}
-      >
-        Save Draft
-      </Button>
-      <Button onClick={() => handleSave("published")} disabled={saving}>
-        {post.status === "published" ? "Update" : "Publish"}
-      </Button>
-    </div>
-  );
+  const effectiveSlug = slugTouched ? slug : slugify(title);
+  const uploadPath =
+    effectiveSlug && location ? { location, slug: effectiveSlug } : undefined;
 
   async function handleGpxUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -120,14 +75,14 @@ export default function EditPostForm({
       e.target.value = "";
       return;
     }
-    if (!title || !location) {
-      alert("Please set title and location before uploading files");
+    if (!effectiveSlug || !location) {
+      alert("Please set title/slug and location before uploading files");
       e.target.value = "";
       return;
     }
     setUploadingGpx(true);
     try {
-      const { url } = await uploadImage(file, { location, slug: post.slug });
+      const { url } = await uploadImage(file, { location, slug: effectiveSlug });
       setGpxUrl(url);
     } finally {
       setUploadingGpx(false);
@@ -137,14 +92,14 @@ export default function EditPostForm({
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!title || !location) {
-      alert("Please set title and location before uploading images");
+    if (!effectiveSlug || !location) {
+      alert("Please set title/slug and location before uploading images");
       e.target.value = "";
       return;
     }
     setUploadingCover(true);
     try {
-      const { url, thumbUrl } = await uploadImage(file, { location, slug: post.slug, cover: true });
+      const { url, thumbUrl } = await uploadImage(file, { location, slug: effectiveSlug, cover: true });
       setCoverImage(url);
       if (thumbUrl) setCoverImageThumb(thumbUrl);
     } finally {
@@ -158,10 +113,17 @@ export default function EditPostForm({
       alert("Title and location are required");
       return;
     }
+    if (!SLUG_PATTERN.test(effectiveSlug)) {
+      alert(
+        "Slug must be lowercase letters, numbers, and hyphens (e.g. mount-rainier-traverse). It cannot be changed later."
+      );
+      return;
+    }
     setSaving(true);
     try {
-      await updatePost(post.id, {
+      await createPost({
         title,
+        slug: effectiveSlug,
         content: JSON.stringify(content),
         description: description || undefined,
         coverImage: coverImage || undefined,
@@ -186,16 +148,22 @@ export default function EditPostForm({
     }
   }
 
-  async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this post?")) return;
-    await deletePost(post.id);
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Edit Post</h1>
-        {actionButtons}
+        <h1 className="text-2xl font-bold">New Post</h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => handleSave("draft")}
+            disabled={saving}
+          >
+            Save Draft
+          </Button>
+          <Button onClick={() => handleSave("published")} disabled={saving}>
+            Publish
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -209,19 +177,28 @@ export default function EditPostForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="slug">Slug (permanent)</Label>
-        <Input id="slug" value={post.slug} readOnly disabled />
+        <Label htmlFor="slug">Slug (permanent — cannot be changed later)</Label>
+        <Input
+          id="slug"
+          value={effectiveSlug}
+          onChange={(e) => {
+            setSlugTouched(true);
+            setSlug(e.target.value);
+          }}
+          placeholder="mount-rainier-traverse"
+          pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        />
         <p className="text-xs text-muted-foreground">
-          URL: /posts/{post.slug}
+          Used in the URL: /posts/{effectiveSlug || "your-slug"}
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">Excerpt</Label>
         <Input
           id="description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => setExcerpt(e.target.value)}
           placeholder="Short description for previews"
         />
       </div>
@@ -361,14 +338,8 @@ export default function EditPostForm({
 
       <div className="space-y-2">
         <Label>Content</Label>
-        <Editor
-          initialContent={post.content as JSONContent}
-          editorRef={editorRef}
-          uploadPath={uploadPath}
-        />
+        <Editor editorRef={editorRef} uploadPath={uploadPath} />
       </div>
-
-      <div className="flex justify-end">{actionButtons}</div>
     </div>
   );
 }
