@@ -4,7 +4,7 @@ import { LOCATION_TAGS } from "@/lib/constants";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Alpine Rock", href: "/tags/Alpine Rock" },
+  { label: "Alpine Climb", href: "/tags/Alpine Climb" },
   { label: "Scramble", href: "/tags/Scramble" },
   { label: "Ski Touring", href: "/tags/Ski Touring" },
   { label: "About Us", href: "/about" },

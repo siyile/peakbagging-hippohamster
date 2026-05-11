@@ -60,11 +60,11 @@ export function MobileMenu() {
               Home
             </Link>
             <Link
-              href="/tags/Alpine Rock"
+              href="/tags/Alpine Climb"
               onClick={() => setOpen(false)}
               className="w-full border-t px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-muted"
             >
-              Alpine Rock
+              Alpine Climb
             </Link>
             <Link
               href="/tags/Scramble"
