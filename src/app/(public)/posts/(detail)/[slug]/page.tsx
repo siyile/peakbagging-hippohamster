@@ -13,6 +13,8 @@ import { getRelatedPosts } from "@/lib/recommendations";
 import { PostMetadataBlock } from "@/components/post-metadata-block";
 import Image from "next/image";
 
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
   const rows = await db
     .select({ slug: posts.slug })
