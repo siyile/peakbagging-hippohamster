@@ -11,6 +11,7 @@ export function FigureNodeView({
   return (
     <NodeViewWrapper
       as="figure"
+      data-drag-handle
       className={`image-figure ${selected ? "ring-2 ring-primary" : ""}`}
     >
       <img src={node.attrs.src} alt={node.attrs.alt || ""} />

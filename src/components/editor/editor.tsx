@@ -49,6 +49,11 @@ export default function Editor({ initialContent, editorRef, uploadPath }: Editor
       scrollMargin: { top: 80, bottom: 200, left: 0, right: 0 },
       scrollThreshold: { top: 80, bottom: 200, left: 0, right: 0 },
       handleDrop(view, event) {
+        // Internal Tiptap node drags carry a ProseMirror slice — let Tiptap
+        // handle those so the node is moved (not copied) with all attrs intact.
+        if (event.dataTransfer?.types.includes("application/x-pm-slice"))
+          return false;
+
         const files = event.dataTransfer?.files;
         if (!files?.length) return false;
 

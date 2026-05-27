@@ -2,6 +2,8 @@ import Image from "@tiptap/extension-image";
 import { mergeAttributes } from "@tiptap/core";
 
 export const FigureImage = Image.extend({
+  draggable: true,
+
   addAttributes() {
     return {
       ...this.parent?.(),
