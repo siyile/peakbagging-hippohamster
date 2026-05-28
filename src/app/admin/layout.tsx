@@ -9,14 +9,14 @@ export default function AdminLayout({
         <a href="/admin/posts" className="text-xl font-bold">
           Admin
         </a>
-        <form action="/admin/login" method="GET">
-          <button
-            type="submit"
-            className="text-sm text-muted-foreground hover:underline"
-          >
+        <nav className="flex items-center gap-4 text-sm text-muted-foreground">
+          <a href="/admin/storage" className="hover:underline">
+            Storage
+          </a>
+          <a href="/admin/login" className="hover:underline">
             Logout
-          </button>
-        </form>
+          </a>
+        </nav>
       </header>
       <main>{children}</main>
     </div>
