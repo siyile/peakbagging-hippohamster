@@ -10,6 +10,15 @@ export default function AdminLayout({
           Admin
         </a>
         <nav className="flex items-center gap-4 text-sm text-muted-foreground">
+          <a href="/admin/posts" className="hover:underline">
+            Posts
+          </a>
+          <a href="/admin/views" className="hover:underline">
+            Views
+          </a>
+          <a href="/admin/similarities" className="hover:underline">
+            Similarities
+          </a>
           <a href="/admin/storage" className="hover:underline">
             Storage
           </a>
