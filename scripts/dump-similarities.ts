@@ -94,6 +94,12 @@ function effortGain(
   return gainFt * (1 + pct / 100);
 }
 
+function elevationScore(value: number | null | undefined): number | null {
+  if (value == null) return null;
+  if (value < 10000) return value / 1000;
+  return 30 + value / 1000;
+}
+
 // ── Similarity algorithm (from src/lib/recommendations.ts) ───────────────────
 
 const WEIGHTS = {
@@ -103,7 +109,7 @@ const WEIGHTS = {
   glacier: 0.8,
   snow: 0.8,
   skiTouring: 0.8,
-  elevation: 0.4,
+  elevation: 1.0,
   effortGain: 0.2,
   offTrail: 0.2,
   distance: 0.2,
@@ -197,7 +203,7 @@ async function loadPostFeatures(): Promise<PostFeatures[]> {
       id: r.id,
       slug: r.slug,
       title: r.title,
-      elevation: r.elevationFt,
+      elevation: elevationScore(r.elevationFt),
       effortGain: effortGain(r.elevationGainFt, r.offTrailRatio),
       distance: distanceMiles,
       climbHours: timeCategoryHours(r.timeCategory),

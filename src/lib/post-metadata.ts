@@ -83,6 +83,14 @@ export function snowRatingLabel(value: string | null | undefined): string | null
   return match ? match.label : null;
 }
 
+// Below 10k ft: ft/1000 (e.g. 6700 → 6.7). At/above 10k: 30 + ft/1000 (e.g. 11000 → 41),
+// so high alpine routes cluster apart from lower-elevation ones.
+export function elevationScore(value: number | null | undefined): number | null {
+  if (value == null) return null;
+  if (value < 10000) return value / 1000;
+  return 30 + value / 1000;
+}
+
 // 40% off-trail → gain effectively counts 1.4× toward effort
 export function effortGain(
   gainFt: number | null | undefined,

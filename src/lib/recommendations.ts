@@ -8,6 +8,7 @@ import {
   rockRatingScore,
   snowRatingScore,
   effortGain,
+  elevationScore,
 } from "./post-metadata";
 import { LOCATION_TAGS } from "./constants";
 
@@ -28,7 +29,7 @@ const WEIGHTS = {
   glacier: 0.8,
   snow: 0.8,
   skiTouring: 0.8,
-  elevation: 0.4,
+  elevation: 1.0,
   effortGain: 0.2,
   offTrail: 0.2,
   distance: 0.2,
@@ -135,7 +136,7 @@ async function loadPostFeatures(): Promise<PostFeatures[]> {
       coverImage: r.coverImage,
       coverImageThumb: r.coverImageThumb,
       viewCount: r.viewCount,
-      elevation: r.elevationFt,
+      elevation: elevationScore(r.elevationFt),
       effortGain: effortGain(r.elevationGainFt, r.offTrailRatio),
       distance: distanceMiles,
       climbHours: timeCategoryHours(r.timeCategory),
