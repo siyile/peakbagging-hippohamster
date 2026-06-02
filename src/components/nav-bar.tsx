@@ -24,7 +24,7 @@ export function NavBar() {
         </Link>
       ))}
       <div className="relative group">
-        <button className="text-foreground hover:text-brand font-medium cursor-pointer">
+        <button className="text-foreground hover:text-brand font-medium">
           Location ▾
         </button>
         <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1 hidden group-hover:block z-50">
