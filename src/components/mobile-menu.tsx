@@ -67,6 +67,13 @@ export function MobileMenu() {
               Alpine Climb
             </Link>
             <Link
+              href="/tags/Glacier Climb"
+              onClick={() => setOpen(false)}
+              className="w-full border-t px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-muted"
+            >
+              Glacier Climb
+            </Link>
+            <Link
               href="/tags/Scramble"
               onClick={() => setOpen(false)}
               className="w-full border-t px-4 py-3 text-lg font-medium text-muted-foreground hover:bg-muted"

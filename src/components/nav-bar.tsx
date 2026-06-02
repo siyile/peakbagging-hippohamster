@@ -5,6 +5,7 @@ import { SearchButton } from "@/components/search-button";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Alpine Climb", href: "/tags/Alpine Climb" },
+  { label: "Glacier Climb", href: "/tags/Glacier Climb" },
   { label: "Scramble", href: "/tags/Scramble" },
   { label: "Ski Touring", href: "/tags/Ski Touring" },
   { label: "About Us", href: "/about" },
