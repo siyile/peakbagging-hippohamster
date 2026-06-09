@@ -27,7 +27,7 @@ export default async function PostsPage() {
       })
       .from(posts)
       .where(eq(posts.status, "published"))
-      .orderBy(desc(posts.publishedAt))
+      .orderBy(desc(posts.tripDate))
       .limit(PAGE_SIZE),
     db
       .select({

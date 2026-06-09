@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [error, formAction, isPending] = useActionState(login, null);
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center px-4">
       <form action={formAction} className="w-full max-w-sm space-y-4">
         <h1 className="text-2xl font-bold">Admin Login</h1>
         {error && <p className="text-sm text-red-500">{error}</p>}

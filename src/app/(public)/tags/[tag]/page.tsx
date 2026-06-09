@@ -44,7 +44,7 @@ export default async function TagPage({
       .innerJoin(postTags, eq(posts.id, postTags.postId))
       .innerJoin(tags, eq(postTags.tagId, tags.id))
       .where(and(eq(posts.status, "published"), sql`lower(${tags.name}) = ${decoded.toLowerCase()}`))
-      .orderBy(desc(posts.publishedAt))
+      .orderBy(desc(posts.tripDate))
       .limit(PAGE_SIZE),
     db
       .select({

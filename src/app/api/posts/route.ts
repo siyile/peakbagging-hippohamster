@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const tag = url.searchParams.get("tag");
 
   const orderBy =
-    sort === "popular" ? desc(posts.viewCount) : desc(posts.publishedAt);
+    sort === "popular" ? desc(posts.viewCount) : desc(posts.tripDate);
 
   const rows = tag
     ? await db
