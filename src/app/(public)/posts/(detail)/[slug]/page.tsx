@@ -11,7 +11,8 @@ import { FigureImage } from "@/lib/figure-image";
 import { PopularClimbs } from "@/components/popular-climbs";
 import { getRelatedPosts } from "@/lib/recommendations";
 import { PostMetadataBlock } from "@/components/post-metadata-block";
-import { META_DESCRIPTION_SUFFIX } from "@/lib/constants";
+import { JsonLd } from "@/components/json-ld";
+import { META_DESCRIPTION_SUFFIX, SITE_URL } from "@/lib/constants";
 import Image from "next/image";
 
 export const revalidate = 3600;
@@ -109,23 +110,49 @@ export default async function PostPage({
     FigureImage,
   ]);
 
+  const postUrl = `${SITE_URL}/posts/${post.slug}`;
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.description ?? undefined,
-    ...(post.coverImage && { image: post.coverImage }),
-    ...(post.tripDate && { datePublished: new Date(post.tripDate).toISOString() }),
-    dateModified: post.updatedAt.toISOString(),
-    author: { "@type": "Person", name: "Siyi" },
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        "@id": `${postUrl}#article`,
+        url: postUrl,
+        mainEntityOfPage: postUrl,
+        headline: post.title,
+        description: post.metaDescription ?? post.description ?? undefined,
+        ...(post.coverImage && { image: post.coverImage }),
+        ...(post.tripDate && {
+          datePublished: new Date(post.tripDate).toISOString(),
+        }),
+        dateModified: post.updatedAt.toISOString(),
+        author: { "@type": "Person", name: "Siyi" },
+        publisher: { "@id": `${SITE_URL}/#org` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Trip Reports",
+            item: `${SITE_URL}/posts`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: post.title,
+            item: postUrl,
+          },
+        ],
+      },
+    ],
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[1fr_var(--featured-w,280px)] gap-0 md:gap-8">
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
+    <JsonLd data={jsonLd} />
     <article>
       {post.coverImage && (
         <Image
