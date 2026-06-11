@@ -10,6 +10,9 @@ export const metadata = {
   title: "Home",
   description:
     "Featured climbs and recent trip reports from Hippo and Hamster's Washington Cascades alpine adventures.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 const PAGE_SIZE = 10;

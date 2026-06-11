@@ -10,6 +10,9 @@ export const metadata = {
   title: "Recent Articles",
   description:
     "Browse all trip reports — detailed route beta with photos for alpine rock, scrambles, and glacier climbs in the PNW.",
+  alternates: {
+    canonical: "/posts",
+  },
 };
 
 const PAGE_SIZE = 10;

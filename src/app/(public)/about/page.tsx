@@ -6,6 +6,9 @@ export const metadata = {
   title: "About",
   description:
     "Meet Siyi (Hippo) and Chutang (Hamster) — PNW climbers sharing detailed route beta and trip reports from the Washington Cascades.",
+  alternates: {
+    canonical: "/about",
+  },
 };
 
 export default function AboutPage() {

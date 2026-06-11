@@ -2,8 +2,7 @@ import type { MetadataRoute } from "next";
 import { db } from "@/db";
 import { posts, tags } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-
-const BASE_URL = "https://hippohamster.vercel.app";
+import { SITE_URL as BASE_URL } from "@/lib/constants";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const publishedPosts = await db

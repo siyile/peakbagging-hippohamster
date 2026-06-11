@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
 const inter = Inter({
@@ -8,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://hippohamster.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "HippoHamster",
     template: "%s | HippoHamster",

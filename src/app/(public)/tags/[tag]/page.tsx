@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { db } from "@/db";
 import { posts, tags, postTags } from "@/db/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
+import { notFound } from "next/navigation";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
 import { InfinitePostCardList } from "@/components/infinite-post-card-list";
@@ -17,6 +18,9 @@ export async function generateMetadata({
   return {
     title: decoded,
     description: `Browse all ${decoded} trip reports — detailed route beta with photos from the Washington Cascades.`,
+    alternates: {
+      canonical: `/tags/${encodeURIComponent(decoded)}`,
+    },
   };
 }
 
@@ -62,16 +66,10 @@ export default async function TagPage({
       .limit(5),
   ]);
 
+  // A tag with no published posts is a dead end — return a real 404 rather than
+  // a thin 200 page, which Google flags as a soft 404.
   if (latestPosts.length === 0) {
-    return (
-      <div>
-        <HeroBanner />
-        <NavBar />
-        <div className="pl-12 mt-8">
-          <h1 className="text-3xl font-bold">No posts tagged &ldquo;{decoded}&rdquo;</h1>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   const showPopular = latestPosts.length >= PAGE_SIZE;
