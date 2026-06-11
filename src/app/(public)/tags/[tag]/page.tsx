@@ -17,7 +17,7 @@ export async function generateMetadata({
   const decoded = decodeURIComponent(tag);
   return {
     title: decoded,
-    description: `Browse all ${decoded} trip reports — detailed route beta with photos from the Washington Cascades.`,
+    description: `Browse every ${decoded} trip report from the PNW, with detailed route beta, conditions, climb stats, and photos.`,
     alternates: {
       canonical: `/tags/${encodeURIComponent(decoded)}`,
     },

@@ -7,9 +7,9 @@ import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
 
 export const metadata = {
-  title: "Recent Articles",
+  title: "Trip Reports",
   description:
-    "Browse all trip reports — detailed route beta with photos for alpine rock, scrambles, and glacier climbs in the PNW.",
+    "Trip reports and route beta for peaks across the Washington Cascades and Olympics: scrambles, alpine rock, glacier climbs, and ski tours, with photos.",
   alternates: {
     canonical: "/posts",
   },

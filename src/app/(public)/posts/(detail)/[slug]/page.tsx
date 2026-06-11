@@ -34,6 +34,7 @@ export async function generateMetadata({
     .select({
       title: posts.title,
       description: posts.description,
+      metaDescription: posts.metaDescription,
       coverImage: posts.coverImage,
     })
     .from(posts)
@@ -42,10 +43,11 @@ export async function generateMetadata({
 
   if (!post) return {};
 
-  // On-page uses post.description as-is; search engines get the clean sentence
-  // plus a short tail to improve the snippet.
-  const metaDescription = post.description
-    ? `${post.description} ${META_DESCRIPTION_SUFFIX}`
+  // The on-page subtitle uses the short post.description. Search engines get the
+  // longer meta_description (falling back to description) plus a short tail.
+  const metaBase = post.metaDescription ?? post.description;
+  const metaDescription = metaBase
+    ? `${metaBase} ${META_DESCRIPTION_SUFFIX}`
     : undefined;
 
   return {

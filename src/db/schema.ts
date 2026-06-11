@@ -19,6 +19,7 @@ export const posts = pgTable("posts", {
   slug: varchar("slug", { length: 255 }).unique().notNull(),
   content: jsonb("content").notNull(),
   description: text("description"),
+  metaDescription: text("meta_description"),
   coverImage: varchar("cover_image", { length: 500 }),
   coverImageThumb: varchar("cover_image_thumb", { length: 500 }),
   tripDate: timestamp("trip_date"),

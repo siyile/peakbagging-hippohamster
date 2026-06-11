@@ -37,6 +37,7 @@ export type PostFormData = {
   slug?: string;
   content: string;
   description?: string;
+  metaDescription?: string;
   coverImage?: string;
   coverImageThumb?: string;
   tripDate?: string;
@@ -74,6 +75,7 @@ export async function createPost(formData: PostFormData) {
       slug,
       content,
       description: formData.description || null,
+      metaDescription: formData.metaDescription || null,
       coverImage: formData.coverImage || null,
       coverImageThumb: formData.coverImageThumb || null,
       tripDate: formData.tripDate ? new Date(formData.tripDate) : null,
@@ -119,6 +121,7 @@ export async function updatePost(id: number, formData: PostFormData) {
       title: formData.title,
       content,
       description: formData.description || null,
+      metaDescription: formData.metaDescription || null,
       coverImage: formData.coverImage || null,
       coverImageThumb: formData.coverImageThumb || null,
       tripDate: formData.tripDate ? new Date(formData.tripDate) : null,

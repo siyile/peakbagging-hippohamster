@@ -45,6 +45,9 @@ export default function EditPostForm({
 }) {
   const [title, setTitle] = useState(post.title);
   const [description, setDescription] = useState(post.description || "");
+  const [metaDescription, setMetaDescription] = useState(
+    post.metaDescription || ""
+  );
   const initialLocation = initialTags.find((t) =>
     (LOCATION_TAGS as readonly string[]).includes(t)
   ) || "";
@@ -164,6 +167,7 @@ export default function EditPostForm({
         title,
         content: JSON.stringify(content),
         description: description || undefined,
+        metaDescription: metaDescription || undefined,
         coverImage: coverImage || undefined,
         coverImageThumb: coverImageThumb || undefined,
         tripDate: tripDate || undefined,
@@ -224,6 +228,20 @@ export default function EditPostForm({
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Short description for previews"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="metaDescription">Meta description (SEO)</Label>
+        <Input
+          id="metaDescription"
+          value={metaDescription}
+          onChange={(e) => setMetaDescription(e.target.value)}
+          placeholder="Longer search-result description (about 110-130 chars)"
+        />
+        <p className="text-xs text-muted-foreground">
+          Shown only in Google results, not on the site. Falls back to
+          Description if blank.
+        </p>
       </div>
 
       <div className="space-y-2">

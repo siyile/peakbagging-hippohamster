@@ -47,6 +47,7 @@ export default function NewPostForm({
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [description, setExcerpt] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
   const [tags, setTags] = useState("");
   const [pillTags, setPillTags] = useState<string[]>([]);
   const [location, setLocation] = useState("");
@@ -126,6 +127,7 @@ export default function NewPostForm({
         slug: effectiveSlug,
         content: JSON.stringify(content),
         description: description || undefined,
+        metaDescription: metaDescription || undefined,
         coverImage: coverImage || undefined,
         coverImageThumb: coverImageThumb || undefined,
         tripDate: tripDate || undefined,
@@ -201,6 +203,20 @@ export default function NewPostForm({
           onChange={(e) => setExcerpt(e.target.value)}
           placeholder="Short description for previews"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="metaDescription">Meta description (SEO)</Label>
+        <Input
+          id="metaDescription"
+          value={metaDescription}
+          onChange={(e) => setMetaDescription(e.target.value)}
+          placeholder="Longer search-result description (about 110-130 chars)"
+        />
+        <p className="text-xs text-muted-foreground">
+          Shown only in Google results, not on the site. Falls back to the
+          excerpt if blank.
+        </p>
       </div>
 
       <div className="space-y-2">
