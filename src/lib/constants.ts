@@ -3,6 +3,10 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hippohamster.com";
 
+// Search-only tail appended to a post's clean description to build the Google
+// meta description. Kept out of posts.description so it never shows on the page.
+export const META_DESCRIPTION_SUFFIX = "Route beta and photos.";
+
 export const LOCATION_TAGS = [
   "North Cascades",
   "Mountain Loop Highway",

@@ -11,6 +11,7 @@ import { FigureImage } from "@/lib/figure-image";
 import { PopularClimbs } from "@/components/popular-climbs";
 import { getRelatedPosts } from "@/lib/recommendations";
 import { PostMetadataBlock } from "@/components/post-metadata-block";
+import { META_DESCRIPTION_SUFFIX } from "@/lib/constants";
 import Image from "next/image";
 
 export const revalidate = 3600;
@@ -41,15 +42,21 @@ export async function generateMetadata({
 
   if (!post) return {};
 
+  // On-page uses post.description as-is; search engines get the clean sentence
+  // plus a short tail to improve the snippet.
+  const metaDescription = post.description
+    ? `${post.description} ${META_DESCRIPTION_SUFFIX}`
+    : undefined;
+
   return {
     title: post.title,
-    description: post.description ?? undefined,
+    description: metaDescription,
     alternates: {
       canonical: `/posts/${slug}`,
     },
     openGraph: {
       title: post.title,
-      description: post.description ?? undefined,
+      description: metaDescription,
       type: "article",
       ...(post.coverImage && {
         images: [{ url: post.coverImage, width: 1200, height: 630 }],
@@ -57,7 +64,7 @@ export async function generateMetadata({
     },
     twitter: {
       title: post.title,
-      description: post.description ?? undefined,
+      description: metaDescription,
       ...(post.coverImage && { images: [post.coverImage] }),
     },
   };
