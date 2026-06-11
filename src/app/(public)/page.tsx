@@ -7,7 +7,9 @@ import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PopularClimbs } from "@/components/popular-climbs";
 
 export const metadata = {
-  title: "Home",
+  title: {
+    absolute: "HippoHamster: PNW Alpine Climbing Trip Reports & Route Beta",
+  },
   description:
     "Featured climbs and recent trip reports from Hippo and Hamster's Washington Cascades alpine adventures.",
   alternates: {
