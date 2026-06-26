@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { uploadImage } from "@/components/editor/image-upload";
-import { LOCATION_TAGS } from "@/lib/constants";
+import { LOCATION_TAGS, SITE_URL } from "@/lib/constants";
 import type { Post } from "@/db/schema";
 import type { Editor as TiptapEditor, JSONContent } from "@tiptap/react";
 import { useRouter } from "next/navigation";
@@ -215,8 +215,16 @@ export default function EditPostForm({
       <div className="space-y-2">
         <Label htmlFor="slug">Slug (permanent)</Label>
         <Input id="slug" value={post.slug} readOnly disabled />
-        <p className="text-xs text-muted-foreground">
-          URL: /posts/{post.slug}
+        <p className="text-base text-muted-foreground">
+          URL:{" "}
+          <a
+            href={`${SITE_URL}/posts/${post.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline underline-offset-2 hover:no-underline"
+          >
+            {SITE_URL}/posts/{post.slug}
+          </a>
         </p>
       </div>
 

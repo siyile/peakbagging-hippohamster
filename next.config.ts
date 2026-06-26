@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Raise the buffered request-body limit (default 10MB) so larger
+    // image/GPX uploads to /api/upload aren't truncated.
+    proxyClientMaxBodySize: "25mb",
+  },
   images: {
     remotePatterns: [
       {
