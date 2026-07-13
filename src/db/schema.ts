@@ -36,6 +36,7 @@ export const posts = pgTable("posts", {
   snowRating: varchar("snow_rating", { length: 20 }),
   offTrailRatio: integer("off_trail_ratio"),
   isSkiTouring: boolean("is_ski_touring").default(false).notNull(),
+  author: varchar("author", { length: 100 }).default("Siyi").notNull(),
   viewCount: integer("view_count").default(0).notNull(),
   status: varchar("status", { length: 20 }).default("draft").notNull(),
   publishedAt: timestamp("published_at"),

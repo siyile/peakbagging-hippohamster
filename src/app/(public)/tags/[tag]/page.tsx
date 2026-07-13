@@ -43,6 +43,7 @@ export default async function TagPage({
         coverImage: posts.coverImage,
         coverImageThumb: posts.coverImageThumb,
         tripDate: posts.tripDate,
+        author: posts.author,
       })
       .from(posts)
       .innerJoin(postTags, eq(posts.id, postTags.postId))

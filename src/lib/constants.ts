@@ -7,6 +7,9 @@ export const SITE_URL =
 // meta description. Kept out of posts.description so it never shows on the page.
 export const META_DESCRIPTION_SUFFIX = "Route beta and photos.";
 
+export const AUTHOR_OPTIONS = ["Siyi", "Chutang", "Chutang and Siyi"] as const;
+export const DEFAULT_AUTHOR = "Siyi";
+
 export const LOCATION_TAGS = [
   "North Cascades",
   "Mountain Loop Highway",

@@ -126,7 +126,10 @@ export default async function PostPage({
           datePublished: new Date(post.tripDate).toISOString(),
         }),
         dateModified: post.updatedAt.toISOString(),
-        author: { "@type": "Person", name: "Siyi" },
+        author: (post.author || "Siyi")
+          .split(/,|\band\b/)
+          .map((name) => ({ "@type": "Person", name: name.trim() }))
+          .filter((p) => p.name),
         publisher: { "@id": `${SITE_URL}/#org` },
       },
       {
@@ -200,7 +203,7 @@ export default async function PostPage({
               })}
             </time>
             <span>·</span>
-            <span>by Siyi</span>
+            <span>by {post.author || "Siyi"}</span>
           </div>
         )}
       </header>

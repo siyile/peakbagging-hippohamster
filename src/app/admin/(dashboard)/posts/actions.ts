@@ -54,6 +54,7 @@ export type PostFormData = {
   snowRating?: string | null;
   offTrailRatio?: number | null;
   isSkiTouring?: boolean;
+  author?: string;
   tags?: string[];
   status?: string;
 };
@@ -93,6 +94,7 @@ export async function createPost(formData: PostFormData) {
       snowRating: formData.snowRating || null,
       offTrailRatio: formData.offTrailRatio ?? null,
       isSkiTouring: formData.isSkiTouring ?? false,
+      author: formData.author || "Siyi",
       status: formData.status || "draft",
       publishedAt: isPublished ? new Date() : null,
     })
@@ -139,6 +141,7 @@ export async function updatePost(id: number, formData: PostFormData) {
       snowRating: formData.snowRating || null,
       offTrailRatio: formData.offTrailRatio ?? null,
       isSkiTouring: formData.isSkiTouring ?? false,
+      author: formData.author || "Siyi",
       status: formData.status || "draft",
       publishedAt:
         isPublished && !existing?.publishedAt

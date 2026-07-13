@@ -10,6 +10,7 @@ const POST_FIELDS = {
   coverImage: posts.coverImage,
   coverImageThumb: posts.coverImageThumb,
   tripDate: posts.tripDate,
+  author: posts.author,
 };
 
 export async function GET(request: Request) {

@@ -29,6 +29,7 @@ export default async function HomePage() {
         coverImage: posts.coverImage,
         coverImageThumb: posts.coverImageThumb,
         tripDate: posts.tripDate,
+        author: posts.author,
       })
       .from(posts)
       .where(eq(posts.status, "published"))

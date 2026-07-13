@@ -11,6 +11,7 @@ interface PostCard {
   coverImage: string | null;
   coverImageThumb: string | null;
   tripDate?: string | Date | null;
+  author?: string | null;
 }
 
 function PostCardDesktop({ fp }: { fp: PostCard }) {
@@ -34,7 +35,7 @@ function PostCardDesktop({ fp }: { fp: PostCard }) {
               year: "numeric",
               timeZone: "UTC",
             })}{" "}
-            by Siyi
+            by {fp.author || "Siyi"}
           </p>
         )}
       </div>

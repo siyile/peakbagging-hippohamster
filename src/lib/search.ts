@@ -8,6 +8,7 @@ export type SearchRow = {
   coverImage: string | null;
   coverImageThumb: string | null;
   tripDate: Date | null;
+  author: string | null;
 };
 
 const TRGM_THRESHOLD = 0.2;
@@ -32,6 +33,7 @@ export async function searchPosts({
         cover_image       AS "coverImage",
         cover_image_thumb AS "coverImageThumb",
         trip_date         AS "tripDate",
+        author,
         published_at,
         1 AS stage,
         GREATEST(
@@ -53,6 +55,7 @@ export async function searchPosts({
         p.cover_image       AS "coverImage",
         p.cover_image_thumb AS "coverImageThumb",
         p.trip_date         AS "tripDate",
+        p.author,
         p.published_at,
         2 AS stage,
         ts_rank(
@@ -65,7 +68,7 @@ export async function searchPosts({
         AND jsonb_to_tsvector('english', p.content, '["string"]')
             @@ websearch_to_tsquery('english', ${q})
     )
-    SELECT title, slug, description, "coverImage", "coverImageThumb", "tripDate"
+    SELECT title, slug, description, "coverImage", "coverImageThumb", "tripDate", author
     FROM (
       SELECT * FROM title_hits
       UNION ALL

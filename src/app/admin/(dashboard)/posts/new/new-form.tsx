@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { uploadImage } from "@/components/editor/image-upload";
-import { LOCATION_TAGS } from "@/lib/constants";
+import { AUTHOR_OPTIONS, DEFAULT_AUTHOR, LOCATION_TAGS } from "@/lib/constants";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 import dynamic from "next/dynamic";
 import {
@@ -51,6 +51,7 @@ export default function NewPostForm({
   const [tags, setTags] = useState("");
   const [pillTags, setPillTags] = useState<string[]>([]);
   const [location, setLocation] = useState("");
+  const [author, setAuthor] = useState<string>(DEFAULT_AUTHOR);
   const [coverImage, setCoverImage] = useState("");
   const [coverImageThumb, setCoverImageThumb] = useState("");
   const [tripDate, setTripDate] = useState("");
@@ -135,6 +136,7 @@ export default function NewPostForm({
         caltopoUrl: caltopoUrl || undefined,
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
+        author,
         ...routeMetadataToPayload(metadata),
         tags: Array.from(
           new Set([
@@ -271,7 +273,7 @@ export default function NewPostForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="location">Location</Label>
           <Select value={location} onValueChange={setLocation}>
@@ -295,6 +297,21 @@ export default function NewPostForm({
             value={tripDate}
             onChange={(e) => setTripDate(e.target.value)}
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="author">Author</Label>
+          <Select value={author} onValueChange={setAuthor}>
+            <SelectTrigger id="author">
+              <SelectValue placeholder="Select author" />
+            </SelectTrigger>
+            <SelectContent>
+              {AUTHOR_OPTIONS.map((name) => (
+                <SelectItem key={name} value={name}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

@@ -13,7 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { uploadImage } from "@/components/editor/image-upload";
-import { LOCATION_TAGS, SITE_URL } from "@/lib/constants";
+import {
+  AUTHOR_OPTIONS,
+  DEFAULT_AUTHOR,
+  LOCATION_TAGS,
+  SITE_URL,
+} from "@/lib/constants";
 import type { Post } from "@/db/schema";
 import type { Editor as TiptapEditor, JSONContent } from "@tiptap/react";
 import { useRouter } from "next/navigation";
@@ -61,6 +66,7 @@ export default function EditPostForm({
   const [tags, setTags] = useState(initialTextTags.join(", "));
   const [pillTags, setPillTags] = useState<string[]>(initialPillTags);
   const [location, setLocation] = useState(initialLocation);
+  const [author, setAuthor] = useState(post.author || DEFAULT_AUTHOR);
   const [coverImage, setCoverImage] = useState(post.coverImage || "");
   const [coverImageThumb, setCoverImageThumb] = useState(post.coverImageThumb || "");
   const [tripDate, setTripDate] = useState(formatDate(post.tripDate));
@@ -175,6 +181,7 @@ export default function EditPostForm({
         caltopoUrl: caltopoUrl || undefined,
         peakbaggerUrl: peakbaggerUrl || undefined,
         nwsUrl: nwsUrl || undefined,
+        author,
         ...routeMetadataToPayload(metadata),
         tags: Array.from(
           new Set([
@@ -304,7 +311,7 @@ export default function EditPostForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="location">Location</Label>
           <Select value={location} onValueChange={setLocation}>
@@ -328,6 +335,21 @@ export default function EditPostForm({
             value={tripDate}
             onChange={(e) => setTripDate(e.target.value)}
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="author">Author</Label>
+          <Select value={author} onValueChange={setAuthor}>
+            <SelectTrigger id="author">
+              <SelectValue placeholder="Select author" />
+            </SelectTrigger>
+            <SelectContent>
+              {AUTHOR_OPTIONS.map((name) => (
+                <SelectItem key={name} value={name}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
