@@ -5,7 +5,7 @@ export function HeroBanner() {
   return (
     <div className="hidden md:block relative -mt-8 left-1/2 -translate-x-1/2 w-screen overflow-hidden">
       <Image
-        src="https://pub-7aa6c67ec9294828987ab42d35f61c0f.r2.dev/uploads/static/home_cover.webp"
+        src={`${process.env.R2_PUBLIC_URL}/uploads/static/home_cover.webp`}
         alt="Mountain landscape"
         width={1400}
         height={450}

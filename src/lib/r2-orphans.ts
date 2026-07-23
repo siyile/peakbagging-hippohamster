@@ -19,20 +19,33 @@ const UPLOADS_PREFIX = "uploads/";
 // hero-banner.tsx, about/page.tsx) — never tracked in the DB. Treat as safe.
 const PROTECTED_PREFIXES = ["uploads/static/"];
 
+// Post content written before the custom-domain switch still references the
+// legacy r2.dev base. Match both bases so those images are never treated as
+// orphans and deleted.
+const LEGACY_PUBLIC_BASE =
+  "https://pub-7aa6c67ec9294828987ab42d35f61c0f.r2.dev";
+
+function publicBases(): string[] {
+  return [...new Set([process.env.R2_PUBLIC_URL!, LEGACY_PUBLIC_BASE])];
+}
+
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function extractKeyFromUrl(
   url: string | null,
-  publicBase: string
+  bases: string[]
 ): string | null {
   if (!url) return null;
-  const base = publicBase.endsWith("/") ? publicBase : `${publicBase}/`;
-  if (!url.startsWith(base)) return null;
-  const rest = url.slice(base.length);
-  const stripped = rest.split("?")[0].split("#")[0];
-  return stripped || null;
+  for (const publicBase of bases) {
+    const base = publicBase.endsWith("/") ? publicBase : `${publicBase}/`;
+    if (!url.startsWith(base)) continue;
+    const rest = url.slice(base.length);
+    const stripped = rest.split("?")[0].split("#")[0];
+    if (stripped) return stripped;
+  }
+  return null;
 }
 
 // Tiptap stores image nodes with attrs.src, but content may include other
@@ -40,21 +53,23 @@ function extractKeyFromUrl(
 // catches every URL that points at our public base, regardless of node shape.
 function extractKeysFromContent(
   content: unknown,
-  publicBase: string,
+  bases: string[],
   acc: Set<string>
 ): void {
   if (content == null) return;
   const text = typeof content === "string" ? content : JSON.stringify(content);
-  const base = publicBase.endsWith("/") ? publicBase : `${publicBase}/`;
-  const re = new RegExp(`${escapeRegex(base)}[^"'\\s)<>]+`, "g");
-  for (const match of text.match(re) ?? []) {
-    const key = extractKeyFromUrl(match, publicBase);
-    if (key) acc.add(key);
+  for (const publicBase of bases) {
+    const base = publicBase.endsWith("/") ? publicBase : `${publicBase}/`;
+    const re = new RegExp(`${escapeRegex(base)}[^"'\\s)<>]+`, "g");
+    for (const match of text.match(re) ?? []) {
+      const key = extractKeyFromUrl(match, bases);
+      if (key) acc.add(key);
+    }
   }
 }
 
 export async function collectReferencedKeys(): Promise<Set<string>> {
-  const publicBase = process.env.R2_PUBLIC_URL!;
+  const bases = publicBases();
   const rows = await db
     .select({
       coverImage: posts.coverImage,
@@ -66,11 +81,11 @@ export async function collectReferencedKeys(): Promise<Set<string>> {
 
   const referenced = new Set<string>();
   for (const row of rows) {
-    const cover = extractKeyFromUrl(row.coverImage, publicBase);
+    const cover = extractKeyFromUrl(row.coverImage, bases);
     if (cover) referenced.add(cover);
-    const thumb = extractKeyFromUrl(row.coverImageThumb, publicBase);
+    const thumb = extractKeyFromUrl(row.coverImageThumb, bases);
     if (thumb) referenced.add(thumb);
-    const gpx = extractKeyFromUrl(row.gpxUrl, publicBase);
+    const gpx = extractKeyFromUrl(row.gpxUrl, bases);
     if (gpx) {
       referenced.add(gpx);
       // Upload route stores the simplified `{slug}-hippohamster.gpx` URL but
@@ -80,7 +95,7 @@ export async function collectReferencedKeys(): Promise<Set<string>> {
         referenced.add(gpx.replace(/\.gpx$/, "-original.gpx"));
       }
     }
-    extractKeysFromContent(row.content, publicBase, referenced);
+    extractKeysFromContent(row.content, bases, referenced);
   }
   return referenced;
 }

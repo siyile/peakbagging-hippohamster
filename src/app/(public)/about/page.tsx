@@ -32,7 +32,7 @@ export default function AboutPage() {
           </div>
           <figure className="mt-6 md:mt-0 md:w-[300px]">
             <Image
-              src="https://pub-7aa6c67ec9294828987ab42d35f61c0f.r2.dev/uploads/static/about_us.webp"
+              src={`${process.env.R2_PUBLIC_URL}/uploads/static/about_us.webp`}
               alt="Siyi and Chutang"
               width={300}
               height={400}
