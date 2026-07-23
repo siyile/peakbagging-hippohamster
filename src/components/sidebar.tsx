@@ -15,7 +15,7 @@ export function Sidebar() {
   return (
     <aside className="sticky top-8 self-start">
       <Link href="/" className="flex items-center gap-2">
-        <Image src="/logo.png" alt="Hippo Hamster" width={72} height={72} />
+        <Image src="/logo.png" alt="Hippo Hamster" width={72} height={72} unoptimized />
         <span className="text-2xl font-bold text-brand">
           Hippo
           <br />

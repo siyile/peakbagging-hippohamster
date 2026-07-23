@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <div className="fixed inset-0 flex items-center justify-center px-4">
       <div className="flex items-center gap-6">
-        <Image src="/logo.png" alt="HippoHamster" width={80} height={80} />
+        <Image src="/logo.png" alt="HippoHamster" width={80} height={80} unoptimized />
         <div className="h-24 w-px bg-border" />
         <div>
           <h1 className="text-2xl font-bold">This page couldn&rsquo;t be found</h1>

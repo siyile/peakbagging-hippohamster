@@ -14,7 +14,7 @@ export function MobileMenu() {
       {/* Bar — always visible, stays above backdrop */}
       <div className="relative z-50 flex items-center justify-between px-4 pt-3 pb-2 bg-background">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="Hippo Hamster" width={48} height={48} />
+          <Image src="/logo.png" alt="Hippo Hamster" width={48} height={48} unoptimized />
           <span className="text-xl font-bold text-brand">Hippo Hamster</span>
         </Link>
         <div className="flex items-center">

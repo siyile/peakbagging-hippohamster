@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     proxyClientMaxBodySize: "25mb",
   },
   images: {
+    // Uploaded images are immutable, so cache optimized variants for 31 days
+    // to avoid repeated transformations (Vercel free tier: 5,000/month).
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       {
         protocol: "https",
