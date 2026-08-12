@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { db } from "@/db";
 import { posts, tags, postTags } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -12,6 +12,7 @@ import { PopularClimbs } from "@/components/popular-climbs";
 import { getRelatedPosts } from "@/lib/recommendations";
 import { PostMetadataBlock } from "@/components/post-metadata-block";
 import { JsonLd } from "@/components/json-ld";
+import { ViewTracker } from "@/components/view-tracker";
 import { META_DESCRIPTION_SUFFIX, SITE_URL } from "@/lib/constants";
 import Image from "next/image";
 
@@ -90,11 +91,6 @@ export default async function PostPage({
     notFound();
   }
 
-  db.update(posts)
-    .set({ viewCount: sql`view_count + 1` })
-    .where(eq(posts.id, post.id))
-    .execute();
-
   const [postTagRows, related] = await Promise.all([
     db
       .select({ name: tags.name })
@@ -156,6 +152,7 @@ export default async function PostPage({
   return (
     <div className="grid grid-cols-1 md:grid-cols-[1fr_var(--featured-w,280px)] gap-0 md:gap-8">
     <JsonLd data={jsonLd} />
+    <ViewTracker slug={post.slug} />
     <article>
       {post.coverImage && (
         <Image
