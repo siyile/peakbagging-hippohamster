@@ -8,6 +8,32 @@ import { NavBar } from "@/components/nav-bar";
 import { InfinitePostCardList } from "@/components/infinite-post-card-list";
 import { PopularClimbs } from "@/components/popular-climbs";
 
+// Tag membership only changes on admin edit, so daily is plenty. Without
+// this the page was fully SSR'd (two DB queries) on every hit.
+export const revalidate = 86400;
+
+export async function generateStaticParams() {
+  const rows = await db
+    .select({ name: tags.name })
+    .from(tags)
+    .innerJoin(postTags, eq(tags.id, postTags.tagId))
+    .innerJoin(posts, eq(postTags.postId, posts.id))
+    .where(eq(posts.status, "published"));
+
+  // Lookups below are case-insensitive and some tags differ only by case
+  // (scramble / Scramble), so dedupe to avoid prerendering duplicate pages.
+  const seen = new Set<string>();
+  const params: { tag: string }[] = [];
+  for (const { name } of rows) {
+    const key = name.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      params.push({ tag: name });
+    }
+  }
+  return params;
+}
+
 export async function generateMetadata({
   params,
 }: {
