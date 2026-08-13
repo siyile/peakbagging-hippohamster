@@ -16,7 +16,12 @@ import { ViewTracker } from "@/components/view-tracker";
 import { META_DESCRIPTION_SUFFIX, SITE_URL } from "@/lib/constants";
 import Image from "next/image";
 
-export const revalidate = 3600;
+// Each expiry re-renders the TipTap JSON through generateHTML — pure CPU — so
+// keep the timer long: it's only a backstop. Content changes publish instantly
+// via revalidatePath in updatePost/deletePost, and the daily similarities cron
+// revalidates these pages after refreshing the Recommended Climbs data.
+// Must stay a plain literal: segment config is statically analyzed.
+export const revalidate = 604800; // 1 week
 
 export async function generateStaticParams() {
   const rows = await db
