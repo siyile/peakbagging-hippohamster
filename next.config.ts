@@ -1,14 +1,54 @@
 import type { NextConfig } from "next";
+import { LEGACY_REDIRECTS } from "./src/lib/redirects";
 
 // Legacy public bucket URL; kept so images referenced before the custom
 // domain switch (stored in post content) continue to render.
 const LEGACY_R2_HOSTNAME = "pub-7aa6c67ec9294828987ab42d35f61c0f.r2.dev";
+
+// Some redirect destinations contain spaces (e.g. /tags/North Cascades).
+// The routing layer emits destinations verbatim, so encode each segment
+// while preserving the / separators.
+const encodePathSegments = (path: string) =>
+  path.split("/").map(encodeURIComponent).join("/");
 
 const r2PublicHostname = process.env.R2_PUBLIC_URL
   ? new URL(process.env.R2_PUBLIC_URL).hostname
   : undefined;
 
 const nextConfig: NextConfig = {
+  // Resolved in Vercel's routing layer before any compute, so these no longer
+  // bill middleware CPU on every request.
+  async redirects() {
+    return [
+      // Specific mappings must come before the catch-all below: first match
+      // wins, and the catch-all would otherwise swallow the 18 post entries.
+      ...Object.entries(LEGACY_REDIRECTS).map(([source, destination]) => ({
+        source,
+        destination: encodePathSegments(destination),
+        permanent: true,
+      })),
+      // Old post URLs always had exactly two segments under /posts; current
+      // posts live at /posts/{slug}. Send unmapped stragglers to the index so
+      // no old URL hard-404s. Note this shadows any future two-segment route
+      // under /posts — none exists today.
+      {
+        source: "/posts/:region/:peak",
+        destination: "/posts",
+        permanent: true,
+      },
+    ];
+  },
+  // Keep *.vercel.app (production alias + preview deploys) out of search
+  // indexes so they don't compete with the canonical www.hippohamster.com.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: ".*\\.vercel\\.app" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
+  },
   experimental: {
     // Raise the buffered request-body limit (default 10MB) so larger
     // image/GPX uploads to /api/upload aren't truncated.

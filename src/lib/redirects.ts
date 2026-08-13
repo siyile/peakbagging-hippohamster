@@ -1,6 +1,11 @@
-// Permanent (308) redirects from the old static-site URLs to the current routes.
-// Keys are pathnames WITHOUT a trailing slash; the lookup normalizes incoming
-// paths before matching. Old posts used /posts/{region}/{peak_with_underscores}/.
+// Permanent (308) redirects from the old static-site URLs to the current
+// routes, consumed by redirects() in next.config.ts so they resolve in the
+// routing layer without invoking middleware. Keys are pathnames WITHOUT a
+// trailing slash (Next's trailing-slash normalization runs first). Old posts
+// used /posts/{region}/{peak_with_underscores}/; entry order matters because
+// next.config.ts appends a catch-all for unmapped /posts/{region}/{peak}
+// URLs after these, and first match wins. Destinations containing spaces are
+// percent-encoded at the point of use.
 export const LEGACY_REDIRECTS: Record<string, string> = {
   // Posts
   "/posts/north_cascades/north_gardner_mountain": "/posts/north-gardner-mountain",
@@ -41,25 +46,3 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   "/page/6": "/posts",
   "/zh": "/",
 };
-
-// Resolve a legacy redirect target for a request pathname, or null if none.
-// Handles trailing slashes and any unmapped legacy /posts/{region}/{peak}/ URL
-// by falling back to the posts index so no old post URL hard-404s.
-export function resolveLegacyRedirect(pathname: string): string | null {
-  const normalized =
-    pathname.length > 1 && pathname.endsWith("/")
-      ? pathname.slice(0, -1)
-      : pathname;
-
-  const mapped = LEGACY_REDIRECTS[normalized];
-  if (mapped) return mapped;
-
-  // Old post URLs always had exactly two path segments under /posts.
-  // Current posts live at /posts/{slug} (one segment), so a two-segment
-  // /posts/x/y path is always legacy — send stragglers to the index.
-  if (/^\/posts\/[^/]+\/[^/]+$/.test(normalized)) {
-    return "/posts";
-  }
-
-  return null;
-}
