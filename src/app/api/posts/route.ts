@@ -46,5 +46,15 @@ export async function GET(request: Request) {
         .offset(offset)
         .limit(limit);
 
-  return NextResponse.json({ posts: rows, hasMore: rows.length === limit });
+  return NextResponse.json(
+    { posts: rows, hasMore: rows.length === limit },
+    {
+      headers: {
+        // The CDN keys on the full URL, so offset/limit/sort/tag variants
+        // cache independently. Kept short so new posts reach the infinite
+        // scroll quickly; stale-while-revalidate hides the refresh.
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+      },
+    }
+  );
 }
