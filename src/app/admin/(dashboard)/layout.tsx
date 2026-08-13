@@ -1,3 +1,5 @@
+import { logout } from "./actions";
+
 export default function AdminLayout({
   children,
 }: {
@@ -22,9 +24,11 @@ export default function AdminLayout({
           <a href="/admin/storage" className="hover:underline">
             Storage
           </a>
-          <a href="/admin/login" className="hover:underline">
-            Logout
-          </a>
+          <form action={logout}>
+            <button type="submit" className="cursor-pointer hover:underline">
+              Logout
+            </button>
+          </form>
         </nav>
       </header>
       <main>{children}</main>
