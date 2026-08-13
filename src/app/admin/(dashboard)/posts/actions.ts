@@ -5,6 +5,7 @@ import { posts, tags, postTags } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/admin-auth";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -60,6 +61,8 @@ export type PostFormData = {
 };
 
 export async function createPost(formData: PostFormData) {
+  await requireAdmin();
+
   const slug = formData.slug?.trim() ?? "";
   if (!SLUG_PATTERN.test(slug)) {
     throw new Error(
@@ -103,11 +106,14 @@ export async function createPost(formData: PostFormData) {
   await syncPostTags(post.id, formData.tags || []);
 
   revalidatePath("/");
+  revalidatePath("/posts");
   revalidatePath("/admin/posts");
   redirect(`/admin/posts/${post.id}/edit`);
 }
 
 export async function updatePost(id: number, formData: PostFormData) {
+  await requireAdmin();
+
   const isPublished = formData.status === "published";
   const content = JSON.parse(formData.content);
 
@@ -154,14 +160,27 @@ export async function updatePost(id: number, formData: PostFormData) {
   await syncPostTags(id, formData.tags || []);
 
   revalidatePath("/");
+  revalidatePath("/posts");
   revalidatePath("/admin/posts");
   if (existing?.slug) revalidatePath(`/posts/${existing.slug}`);
 }
 
 export async function deletePost(id: number) {
+  await requireAdmin();
+
+  // Grab the slug first so the deleted post's cached page can be revalidated;
+  // otherwise it keeps serving from the ISR cache until the weekly timer.
+  const [existing] = await db
+    .select({ slug: posts.slug })
+    .from(posts)
+    .where(eq(posts.id, id))
+    .limit(1);
+
   await db.delete(posts).where(eq(posts.id, id));
 
   revalidatePath("/");
+  revalidatePath("/posts");
   revalidatePath("/admin/posts");
+  if (existing?.slug) revalidatePath(`/posts/${existing.slug}`);
   redirect("/admin/posts");
 }
