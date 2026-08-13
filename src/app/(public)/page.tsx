@@ -17,6 +17,12 @@ export const metadata = {
   },
 };
 
+// Without a timer this page is prerendered once per deploy, freezing the
+// view-count-ordered popular list: /api/views bumps viewCount without
+// revalidating (deliberately — busting the busiest page's cache on every
+// pageview would effectively un-cache it). Hourly is ample for a soft signal.
+export const revalidate = 3600;
+
 const PAGE_SIZE = 10;
 
 export default async function HomePage() {

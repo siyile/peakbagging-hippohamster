@@ -15,6 +15,11 @@ export const metadata = {
   },
 };
 
+// Same reasoning as the homepage: without a timer the view-count-ordered
+// "Most Popular" list freezes at build time, since /api/views never
+// revalidates after bumping viewCount.
+export const revalidate = 3600;
+
 const PAGE_SIZE = 10;
 
 export default async function PostsPage() {
