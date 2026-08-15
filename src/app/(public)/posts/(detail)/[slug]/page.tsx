@@ -13,6 +13,7 @@ import { getRelatedPosts } from "@/lib/recommendations";
 import { PostMetadataBlock } from "@/components/post-metadata-block";
 import { JsonLd } from "@/components/json-ld";
 import { ViewTracker } from "@/components/view-tracker";
+import { ArticleLightbox } from "@/components/article-lightbox";
 import { META_DESCRIPTION_SUFFIX, SITE_URL } from "@/lib/constants";
 import Image from "next/image";
 
@@ -159,6 +160,7 @@ export default async function PostPage({
     <JsonLd data={jsonLd} />
     <ViewTracker slug={post.slug} />
     <article>
+      <ArticleLightbox>
       {post.coverImage && (
         <Image
           src={post.coverImage}
@@ -244,6 +246,7 @@ export default async function PostPage({
         className="prose dark:prose-invert max-w-none px-4 pt-0 pb-0 md:px-6 md:pt-6 text-black dark:text-white"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      </ArticleLightbox>
     </article>
 
     <PopularClimbs
