@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { uploadToR2 } from "@/lib/r2";
 import { jwtVerify } from "jose";
 import sharp from "sharp";
+import { buildImageVariants } from "@/lib/image-pipeline";
+import { buildSrcset, fullUrl, withSuffix } from "@/lib/image-variants";
 import {
   simplifyGpx,
   GPX_SIMPLIFY_TOLERANCE_KM,
@@ -52,17 +54,44 @@ export async function POST(request: Request) {
   const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   if (isImage) {
-    const finalBuffer = await sharp(rawBuffer)
-      .resize(1600, undefined, { withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer();
+    // The bundled libheif parses HEIC containers but has no HEVC decoder, so
+    // sharp will fail on the actual decode. Say so plainly instead of 500ing.
+    let format: string | undefined;
+    try {
+      format = (await sharp(rawBuffer).metadata()).format;
+    } catch {
+      return NextResponse.json({ error: "Unreadable image file" }, { status: 400 });
+    }
+    if (format === "heif") {
+      return NextResponse.json(
+        {
+          error:
+            "HEIC images can't be processed here. Export as JPEG first, or run scripts/backfill-image-variants.ts locally (it transcodes HEIC via ffmpeg).",
+        },
+        { status: 415 },
+      );
+    }
+
     const contentType = "image/webp";
     const key = `${prefix}/${id}.webp`;
-    const url = await uploadToR2(finalBuffer, key, contentType);
+
+    const built = await buildImageVariants(rawBuffer);
+    const uploaded = await Promise.all(
+      built.variants.map(async (v) => ({
+        suffix: v.suffix,
+        url: await uploadToR2(v.buffer, withSuffix(key, v.suffix), contentType),
+      })),
+    );
+    const url = uploaded.find((u) => u.suffix === "")!.url;
+
+    // Keep the untouched upload so a future ladder change (another rung, AVIF,
+    // a quality retune) is a batch job over R2 instead of a re-upload.
+    await uploadToR2(rawBuffer, `originals/${prefix}/${id}.${fileExt}`, file.type);
 
     let thumbUrl: string | undefined;
     if (isCover) {
       const thumbBuffer = await sharp(rawBuffer)
+        .rotate()
         .resize(800, undefined, { withoutEnlargement: true })
         .webp({ quality: 85 })
         .toBuffer();
@@ -70,7 +99,14 @@ export async function POST(request: Request) {
       thumbUrl = await uploadToR2(thumbBuffer, thumbKey, contentType);
     }
 
-    return NextResponse.json({ url, thumbUrl });
+    return NextResponse.json({
+      url,
+      thumbUrl,
+      srcset: buildSrcset(url),
+      full: fullUrl(url),
+      width: built.width,
+      height: built.height,
+    });
   }
 
   if (isGpx) {

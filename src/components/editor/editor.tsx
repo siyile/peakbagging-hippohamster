@@ -14,7 +14,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { FigureImage } from "@/lib/figure-image";
 import { FigureNodeView } from "./figure-view";
 import { EditorToolbar } from "./toolbar";
-import { uploadImage } from "./image-upload";
+import { uploadImage, imageNodeAttrs } from "./image-upload";
 
 interface UploadPath {
   location: string;
@@ -61,13 +61,15 @@ export default function Editor({ initialContent, editorRef, uploadPath }: Editor
         if (!file.type.startsWith("image/")) return false;
 
         event.preventDefault();
-        uploadImage(file, uploadPathRef.current).then(({ url }) => {
+        uploadImage(file, uploadPathRef.current).then((uploaded) => {
           const pos =
             view.posAtCoords({
               left: event.clientX,
               top: event.clientY,
             })?.pos ?? view.state.selection.from;
-          const node = view.state.schema.nodes.image.create({ src: url });
+          const node = view.state.schema.nodes.image.create(
+            imageNodeAttrs(uploaded),
+          );
           view.dispatch(view.state.tr.insert(pos, node));
         });
         return true;
@@ -81,8 +83,10 @@ export default function Editor({ initialContent, editorRef, uploadPath }: Editor
             event.preventDefault();
             const file = item.getAsFile();
             if (!file) return false;
-            uploadImage(file, uploadPathRef.current).then(({ url }) => {
-              const node = view.state.schema.nodes.image.create({ src: url });
+            uploadImage(file, uploadPathRef.current).then((uploaded) => {
+              const node = view.state.schema.nodes.image.create(
+                imageNodeAttrs(uploaded),
+              );
               view.dispatch(view.state.tr.replaceSelectionWith(node));
             });
             return true;

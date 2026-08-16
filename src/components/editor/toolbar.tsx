@@ -19,7 +19,7 @@ import {
   Redo,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { uploadImage } from "./image-upload";
+import { uploadImage, imageNodeAttrs } from "./image-upload";
 
 function ToolbarButton({
   onClick,
@@ -92,10 +92,17 @@ export function EditorToolbar({ editor, uploadPath }: { editor: Editor; uploadPa
       const file = e.target.files?.[0];
       if (!file) return;
       try {
-        const { url } = await uploadImage(file, uploadPathRef.current);
-        editor.chain().focus().setImage({ src: url }).run();
+        const uploaded = await uploadImage(file, uploadPathRef.current);
+        // insertContent rather than setImage: the latter is typed to
+        // {src,alt,title} and would drop srcset/full/width/height.
+        editor
+          .chain()
+          .focus()
+          .insertContent({ type: "image", attrs: imageNodeAttrs(uploaded) })
+          .run();
       } catch (err) {
         console.error("[toolbar] image upload error:", err);
+        alert(err instanceof Error ? err.message : "Image upload failed");
       }
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
