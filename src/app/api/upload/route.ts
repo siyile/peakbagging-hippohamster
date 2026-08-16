@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { uploadToR2 } from "@/lib/r2";
 import { jwtVerify } from "jose";
 import sharp from "sharp";
-import { buildImageVariants } from "@/lib/image-pipeline";
+import { buildImageVariants, COVER_QUALITY } from "@/lib/image-pipeline";
 import { buildSrcset, fullUrl, withSuffix } from "@/lib/image-variants";
 import {
   simplifyGpx,
@@ -75,7 +75,11 @@ export async function POST(request: Request) {
     const contentType = "image/webp";
     const key = `${prefix}/${id}.webp`;
 
-    const built = await buildImageVariants(rawBuffer);
+    // Covers are the hero and the LCP element, so they get a quality bump.
+    const built = await buildImageVariants(
+      rawBuffer,
+      isCover ? { inlineQuality: COVER_QUALITY, fullQuality: COVER_QUALITY } : {},
+    );
     const uploaded = await Promise.all(
       built.variants.map(async (v) => ({
         suffix: v.suffix,

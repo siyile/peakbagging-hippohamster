@@ -22,6 +22,11 @@ export const FULL_SUFFIX = "-full";
 export const IMAGE_SIZES =
   "(min-width: 1400px) 992px, (min-width: 768px) calc(100vw - 408px), 100vw";
 
+// The hero sits flush in the article column with no body padding, so it is
+// 48px wider than an inline figure at every breakpoint.
+export const COVER_SIZES =
+  "(min-width: 1400px) 1040px, (min-width: 768px) calc(100vw - 360px), 100vw";
+
 /** Insert a variant suffix before the file extension of a key or URL. */
 export function withSuffix(pathOrUrl: string, suffix: string): string {
   if (!suffix) return pathOrUrl;

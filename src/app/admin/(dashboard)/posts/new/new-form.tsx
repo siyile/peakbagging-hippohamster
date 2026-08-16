@@ -54,6 +54,8 @@ export default function NewPostForm({
   const [author, setAuthor] = useState<string>(DEFAULT_AUTHOR);
   const [coverImage, setCoverImage] = useState("");
   const [coverImageThumb, setCoverImageThumb] = useState("");
+  const [coverImageSrcset, setCoverImageSrcset] = useState("");
+  const [coverImageFull, setCoverImageFull] = useState("");
   const [tripDate, setTripDate] = useState("");
   const [gpxUrl, setGpxUrl] = useState("");
   const [caltopoUrl, setCaltopoUrl] = useState("");
@@ -101,9 +103,11 @@ export default function NewPostForm({
     }
     setUploadingCover(true);
     try {
-      const { url, thumbUrl } = await uploadImage(file, { location, slug: effectiveSlug, cover: true });
+      const { url, thumbUrl, srcset, full } = await uploadImage(file, { location, slug: effectiveSlug, cover: true });
       setCoverImage(url);
       if (thumbUrl) setCoverImageThumb(thumbUrl);
+      setCoverImageSrcset(srcset ?? "");
+      setCoverImageFull(full ?? "");
     } finally {
       setUploadingCover(false);
     }
@@ -131,6 +135,8 @@ export default function NewPostForm({
         metaDescription: metaDescription || undefined,
         coverImage: coverImage || undefined,
         coverImageThumb: coverImageThumb || undefined,
+        coverImageSrcset: coverImageSrcset || undefined,
+        coverImageFull: coverImageFull || undefined,
         tripDate: tripDate || undefined,
         gpxUrl: gpxUrl || undefined,
         caltopoUrl: caltopoUrl || undefined,

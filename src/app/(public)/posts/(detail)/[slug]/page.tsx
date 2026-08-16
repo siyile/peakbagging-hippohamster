@@ -16,6 +16,7 @@ import { ViewTracker } from "@/components/view-tracker";
 import { ArticleLightbox } from "@/components/article-lightbox";
 import { META_DESCRIPTION_SUFFIX, SITE_URL } from "@/lib/constants";
 import Image from "next/image";
+import { COVER_SIZES } from "@/lib/image-variants";
 
 // Each expiry re-renders the TipTap JSON through generateHTML — pure CPU — so
 // keep the timer long: it's only a backstop. Content changes publish instantly
@@ -161,18 +162,40 @@ export default async function PostPage({
     <ViewTracker slug={post.slug} />
     <article>
       <ArticleLightbox>
-      {post.coverImage && (
-        <Image
-          src={post.coverImage}
-          alt={post.title}
-          width={1200}
-          height={480}
-          priority
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI0ODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2UyZThlMCIvPjwvc3ZnPg=="
-          className="w-full max-h-[480px] object-cover rounded-none md:rounded-xl mb-2 md:mb-0"
-        />
-      )}
+      {post.coverImage &&
+        (post.coverImageSrcset ? (
+          // Covers uploaded with the derivative ladder serve their own variants
+          // straight from R2 — no /_next/image hop, and at the higher quality
+          // the ladder was built with. data-full makes the hero open in the
+          // lightbox like any other article photo.
+          /* eslint-disable-next-line @next/next/no-img-element -- pre-generated ladder; the optimizer would only re-encode it */
+          <img
+            src={post.coverImage}
+            srcSet={post.coverImageSrcset}
+            sizes={COVER_SIZES}
+            {...(post.coverImageFull && { "data-full": post.coverImageFull })}
+            alt={post.title}
+            // Not the file's real aspect — object-cover crops to this box, and
+            // these are the same figures next/image reserved, so the hero holds
+            // its space before loading exactly as it did before.
+            width={1200}
+            height={480}
+            fetchPriority="high"
+            decoding="async"
+            className="w-full max-h-[480px] object-cover rounded-none md:rounded-xl mb-2 md:mb-0 bg-[#e2e8e0]"
+          />
+        ) : (
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            width={1200}
+            height={480}
+            priority
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI0ODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2UyZThlMCIvPjwvc3ZnPg=="
+            className="w-full max-h-[480px] object-cover rounded-none md:rounded-xl mb-2 md:mb-0"
+          />
+        ))}
       <header className="border-b px-4 pt-2 pb-2 md:px-6 md:pt-6 md:pb-6">
         {postTagNames.length > 0 && (
           <div className="mb-1 md:mb-3 flex flex-wrap items-center gap-2">

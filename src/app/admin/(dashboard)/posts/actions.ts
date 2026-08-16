@@ -41,6 +41,8 @@ export type PostFormData = {
   metaDescription?: string;
   coverImage?: string;
   coverImageThumb?: string;
+  coverImageSrcset?: string;
+  coverImageFull?: string;
   tripDate?: string;
   gpxUrl?: string;
   caltopoUrl?: string;
@@ -82,6 +84,8 @@ export async function createPost(formData: PostFormData) {
       metaDescription: formData.metaDescription || null,
       coverImage: formData.coverImage || null,
       coverImageThumb: formData.coverImageThumb || null,
+      coverImageSrcset: formData.coverImageSrcset || null,
+      coverImageFull: formData.coverImageFull || null,
       tripDate: formData.tripDate ? new Date(formData.tripDate) : null,
       gpxUrl: formData.gpxUrl || null,
       caltopoUrl: formData.caltopoUrl || null,
@@ -132,6 +136,8 @@ export async function updatePost(id: number, formData: PostFormData) {
       metaDescription: formData.metaDescription || null,
       coverImage: formData.coverImage || null,
       coverImageThumb: formData.coverImageThumb || null,
+      coverImageSrcset: formData.coverImageSrcset || null,
+      coverImageFull: formData.coverImageFull || null,
       tripDate: formData.tripDate ? new Date(formData.tripDate) : null,
       gpxUrl: formData.gpxUrl || null,
       caltopoUrl: formData.caltopoUrl || null,

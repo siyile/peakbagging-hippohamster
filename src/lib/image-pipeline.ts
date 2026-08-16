@@ -22,6 +22,12 @@ const FULL_QUALITY = 80;
 // Lanczos softens on reduction; this puts the edge back.
 const SHARPEN_SIGMA = 0.5;
 
+// Covers get a further bump. The hero is the first thing a reader sees and the
+// page's LCP element, so it is the one image worth spending extra bytes on.
+// Note the ladder WIDTHS stay the same — pushing the hero past 1600px would
+// hurt LCP far more than the quality gain is worth, since it loads eagerly.
+export const COVER_QUALITY = 88;
+
 export type RenderedVariant = {
   /** "" for the default width, otherwise "-640" / "-1024" / "-full". */
   suffix: string;
@@ -44,7 +50,12 @@ export type BuiltImage = {
  * bundled libheif (it parses the container but has no HEVC decoder), so callers
  * holding HEIC must transcode first — see scripts/lib/decode-source.ts.
  */
-export async function buildImageVariants(input: Buffer): Promise<BuiltImage> {
+export async function buildImageVariants(
+  input: Buffer,
+  opts: { inlineQuality?: number; fullQuality?: number } = {},
+): Promise<BuiltImage> {
+  const inlineQuality = opts.inlineQuality ?? INLINE_QUALITY;
+  const fullQuality = opts.fullQuality ?? FULL_QUALITY;
   // One decode, cloned per output. `.rotate()` with no argument applies EXIF
   // orientation, which sharp does not do implicitly.
   const pipeline = sharp(input, { failOn: "none" }).rotate();
@@ -67,13 +78,13 @@ export async function buildImageVariants(input: Buffer): Promise<BuiltImage> {
   // pipelines is a lot of resident memory for a serverless function.
   const variants: RenderedVariant[] = [];
   for (const width of INLINE_WIDTHS) {
-    variants.push(await render(suffixForWidth(width), { width }, INLINE_QUALITY));
+    variants.push(await render(suffixForWidth(width), { width }, inlineQuality));
   }
   variants.push(
     await render(
       FULL_SUFFIX,
       { width: FULL_LONG_EDGE, height: FULL_LONG_EDGE, fit: "inside" },
-      FULL_QUALITY,
+      fullQuality,
     ),
   );
 

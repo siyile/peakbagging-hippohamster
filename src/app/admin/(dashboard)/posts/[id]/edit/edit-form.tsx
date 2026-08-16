@@ -69,6 +69,8 @@ export default function EditPostForm({
   const [author, setAuthor] = useState(post.author || DEFAULT_AUTHOR);
   const [coverImage, setCoverImage] = useState(post.coverImage || "");
   const [coverImageThumb, setCoverImageThumb] = useState(post.coverImageThumb || "");
+  const [coverImageSrcset, setCoverImageSrcset] = useState(post.coverImageSrcset || "");
+  const [coverImageFull, setCoverImageFull] = useState(post.coverImageFull || "");
   const [tripDate, setTripDate] = useState(formatDate(post.tripDate));
   const [gpxUrl, setGpxUrl] = useState(post.gpxUrl || "");
   const [caltopoUrl, setCaltopoUrl] = useState(post.caltopoUrl || "");
@@ -153,9 +155,11 @@ export default function EditPostForm({
     }
     setUploadingCover(true);
     try {
-      const { url, thumbUrl } = await uploadImage(file, { location, slug: post.slug, cover: true });
+      const { url, thumbUrl, srcset, full } = await uploadImage(file, { location, slug: post.slug, cover: true });
       setCoverImage(url);
       if (thumbUrl) setCoverImageThumb(thumbUrl);
+      setCoverImageSrcset(srcset ?? "");
+      setCoverImageFull(full ?? "");
     } finally {
       setUploadingCover(false);
     }
@@ -176,6 +180,8 @@ export default function EditPostForm({
         metaDescription: metaDescription || undefined,
         coverImage: coverImage || undefined,
         coverImageThumb: coverImageThumb || undefined,
+        coverImageSrcset: coverImageSrcset || undefined,
+        coverImageFull: coverImageFull || undefined,
         tripDate: tripDate || undefined,
         gpxUrl: gpxUrl || undefined,
         caltopoUrl: caltopoUrl || undefined,
