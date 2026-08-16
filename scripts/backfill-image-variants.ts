@@ -115,7 +115,7 @@ async function processImage(url: string, src: string) {
   const built = await buildImageVariants(input);
 
   const result = {
-    srcset: buildSrcset(url),
+    srcset: buildSrcset(url, built.variants),
     full: fullUrl(url),
     width: built.width,
     height: built.height,

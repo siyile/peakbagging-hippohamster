@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       url,
       thumbUrl,
-      srcset: buildSrcset(url),
+      srcset: buildSrcset(url, built.variants),
       full: fullUrl(url),
       width: built.width,
       height: built.height,

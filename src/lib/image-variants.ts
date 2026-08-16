@@ -39,11 +39,25 @@ export function suffixForWidth(width: number): string {
  * srcset covering the inline ladder only. The full variant is deliberately
  * excluded — if it were a candidate, a Retina desktop would pick it for the
  * inline image and undo the point of having a separate lightbox tier.
+ *
+ * Descriptors come from the widths actually rendered, not the nominal ladder:
+ * `withoutEnlargement` caps a rung whenever the source is narrower than it
+ * (common for portrait shots, where a 2048px-tall original is only 1536 wide),
+ * and a `w` descriptor that overstates the file makes the browser pick that
+ * rung for slots it can't actually fill. Rungs that collapse onto the same
+ * width are deduped so a small source doesn't emit duplicate candidates.
  */
-export function buildSrcset(baseUrl: string): string {
-  return INLINE_WIDTHS.map(
-    (w) => `${withSuffix(baseUrl, suffixForWidth(w))} ${w}w`,
-  ).join(", ");
+export function buildSrcset(
+  baseUrl: string,
+  rungs: { suffix: string; width: number }[],
+): string {
+  const seen = new Set<number>();
+  return rungs
+    .filter((r) => r.suffix !== FULL_SUFFIX)
+    .sort((a, b) => a.width - b.width)
+    .filter((r) => (seen.has(r.width) ? false : (seen.add(r.width), true)))
+    .map((r) => `${withSuffix(baseUrl, r.suffix)} ${r.width}w`)
+    .join(", ");
 }
 
 export function fullUrl(baseUrl: string): string {
