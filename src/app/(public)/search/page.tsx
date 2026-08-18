@@ -45,38 +45,28 @@ export default async function SearchPage({
       <HeroBanner />
       <NavBar />
 
-      {/* Desktop: centered single column, no right sidebar */}
-      <div className="hidden md:block mt-4 max-w-[900px] mx-auto">
-        {empty ? (
-          <div className="pl-12">
-            <h2 className="text-[50px] font-semibold text-brand-grey">
-              {heading}
-            </h2>
-            <p className="mt-4 text-muted-foreground text-lg">
-              No posts matched your search. Try different keywords.
-            </p>
-          </div>
-        ) : (
-          <InfinitePostCardList
-            key={query}
-            title={heading}
-            initialPosts={initial.rows}
-            query={query}
-            pageSize={PAGE_SIZE}
-          />
-        )}
-      </div>
-
-      {/* Mobile */}
-      <div className="md:hidden px-4 space-y-3">
+      {/* Centered single column on desktop, no right sidebar. The results feed
+          is mounted once — a second copy would run its own fetch loop off the
+          shared window scroll and double every API call. */}
+      <div className="md:mt-4 md:max-w-[900px] md:mx-auto px-4 md:px-0">
         {empty ? (
           <>
-            <h2 className="text-3xl font-semibold text-brand-grey mt-2">
-              {heading}
-            </h2>
-            <p className="text-muted-foreground">
-              No posts matched your search. Try different keywords.
-            </p>
+            <div className="hidden md:block pl-12">
+              <h2 className="text-[50px] font-semibold text-brand-grey">
+                {heading}
+              </h2>
+              <p className="mt-4 text-muted-foreground text-lg">
+                No posts matched your search. Try different keywords.
+              </p>
+            </div>
+            <div className="md:hidden space-y-3">
+              <h2 className="text-3xl font-semibold text-brand-grey mt-2">
+                {heading}
+              </h2>
+              <p className="text-muted-foreground">
+                No posts matched your search. Try different keywords.
+              </p>
+            </div>
           </>
         ) : (
           <InfinitePostCardList

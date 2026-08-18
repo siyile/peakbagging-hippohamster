@@ -60,29 +60,25 @@ export default async function HomePage() {
       <HeroBanner />
       <NavBar />
 
-      {/* Desktop: Latest Climbs + Featured */}
-      <div className="hidden md:grid grid-cols-[2fr_auto_1fr] gap-8 mt-4">
+      {/* One grid for both breakpoints. Mobile stacks Featured (with photos)
+          above the feed; desktop drops those hidden cells out of the grid
+          entirely, leaving feed | divider | Featured across three columns.
+          Rendering the feed once matters: a second copy would run its own
+          fetch loop off the shared window scroll and double every API call. */}
+      <div className="grid grid-cols-1 md:grid-cols-[2fr_auto_1fr] gap-4 md:gap-8 md:mt-4 px-4 md:px-0">
+        <PopularClimbs
+          posts={popularPosts.slice(0, 4)}
+          withPhotos
+          className="md:hidden"
+        />
         <InfinitePostCardList
           title="Latest Climbs"
           initialPosts={latestPosts}
           sort="latest"
           pageSize={PAGE_SIZE}
         />
-        <div className="w-px bg-border" />
-        <PopularClimbs posts={popularPosts} />
-      </div>
-
-      {/* Mobile: Featured (with photos) on top, Latest below with infinite scroll */}
-      <div className="md:hidden px-4">
-        <PopularClimbs posts={popularPosts.slice(0, 4)} withPhotos />
-        <div className="mt-4">
-          <InfinitePostCardList
-            title="Latest Climbs"
-            initialPosts={latestPosts}
-            sort="latest"
-            pageSize={PAGE_SIZE}
-          />
-        </div>
+        <div className="hidden md:block w-px bg-border" />
+        <PopularClimbs posts={popularPosts} className="hidden md:block" />
       </div>
     </div>
   );

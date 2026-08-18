@@ -106,8 +106,10 @@ export default async function TagPage({
       <HeroBanner />
       <NavBar />
 
-      {/* Desktop layout */}
-      <div className="hidden md:grid grid-cols-[2fr_auto_1fr] gap-8 mt-4">
+      {/* One grid for both breakpoints: mobile is the feed alone, desktop adds
+          the divider and right rail. The feed is mounted once — a second copy
+          would run its own fetch loop off the shared window scroll. */}
+      <div className="grid grid-cols-1 md:grid-cols-[2fr_auto_1fr] gap-4 md:gap-8 md:mt-4 px-4 md:px-0">
         <InfinitePostCardList
           title={`Latest ${decoded} Trips`}
           initialPosts={latestPosts}
@@ -117,21 +119,10 @@ export default async function TagPage({
         />
         {showPopular && (
           <>
-            <div className="w-px bg-border" />
-            <PopularClimbs posts={popularPosts} />
+            <div className="hidden md:block w-px bg-border" />
+            <PopularClimbs posts={popularPosts} className="hidden md:block" />
           </>
         )}
-      </div>
-
-      {/* Mobile layout */}
-      <div className="md:hidden px-4 space-y-3">
-        <InfinitePostCardList
-          title={`Latest ${decoded} Trips`}
-          initialPosts={latestPosts}
-          sort="latest"
-          tag={decoded}
-          pageSize={PAGE_SIZE}
-        />
       </div>
     </div>
   );
