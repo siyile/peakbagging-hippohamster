@@ -35,6 +35,13 @@ function FeedCard({ fp }: { fp: PostCard }) {
           alt={fp.title}
           width={600}
           height={400}
+          // Without this, next/image emits a DPR ladder (`640w 1x, 1200w 2x`)
+          // off the nominal width and a Retina desktop pulls the 1200 rung for
+          // a 280px slot. Keep `100vw` bare: getWidths only recognises a plain
+          // `NNNvw` token, so wrapping it as `calc(100vw - 2rem)` silently
+          // falls through to the full 15-rung ladder instead of the 8 that a
+          // matched vw unit narrows it to.
+          sizes="(min-width: 768px) 280px, 100vw"
           // `md:order-last` moves the cover to the right of the text on
           // desktop while keeping the title first in the DOM. `order` is
           // inert in block flow, so mobile still stacks cover-then-title.

@@ -41,6 +41,11 @@ export function PopularClimbs({
                   alt={post.title}
                   width={600}
                   height={400}
+                  // Full width on mobile; on desktop this variant is the
+                  // Recommended Climbs rail, which the detail layout pins to
+                  // --featured-w: 280px. Same slot geometry as the feed card,
+                  // so the same ladder applies.
+                  sizes="(min-width: 768px) 280px, 100vw"
                   className="w-full aspect-[3/2] object-cover rounded-md"
                 />
               )}
