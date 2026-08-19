@@ -14,21 +14,44 @@ interface PostCard {
   author?: string | null;
 }
 
-function PostCardDesktop({ fp }: { fp: PostCard }) {
+// One card for both breakpoints. This used to be two components rendered side
+// by side and toggled with `hidden md:block` / `md:hidden`, which put every
+// post in the DOM twice — and with infinite scroll that compounds, since each
+// appended page re-reconciled both trees.
+//
+// Mobile stays `block` rather than `flex flex-col` on purpose: the cover is an
+// inline replaced element there, and the line box it sits in contributes a few
+// pixels of descender space above the title. Blockifying it as a flex item
+// would silently tighten that gap.
+function FeedCard({ fp }: { fp: PostCard }) {
   return (
     <Link
       href={`/posts/${fp.slug}`}
-      className="flex items-start gap-6 group"
+      className="group block md:flex md:items-start md:gap-6"
     >
-      <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-brand text-[27px]">{fp.title}</h3>
+      {fp.coverImage && (
+        <Image
+          src={fp.coverImageThumb || fp.coverImage}
+          alt={fp.title}
+          width={600}
+          height={400}
+          // `md:order-last` moves the cover to the right of the text on
+          // desktop while keeping the title first in the DOM. `order` is
+          // inert in block flow, so mobile still stacks cover-then-title.
+          className="w-full aspect-[3/2] object-cover rounded-md md:order-last md:w-[280px] md:shrink-0"
+        />
+      )}
+      <div className="md:flex-1 md:min-w-0">
+        <h3 className="text-xl font-semibold text-brand mt-1 md:mt-0 md:text-[27px]">
+          {fp.title}
+        </h3>
         {fp.description && (
-          <p className="text-[20px] text-muted-foreground line-clamp-2 mt-0.5">
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5 md:text-[20px]">
             {fp.description}
           </p>
         )}
         {fp.tripDate && (
-          <p className="text-[16px] text-muted-foreground mt-1">
+          <p className="hidden md:block text-[16px] text-muted-foreground mt-1">
             {new Date(fp.tripDate).toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",
@@ -39,37 +62,6 @@ function PostCardDesktop({ fp }: { fp: PostCard }) {
           </p>
         )}
       </div>
-      {fp.coverImage && (
-        <Image
-          src={fp.coverImageThumb || fp.coverImage}
-          alt={fp.title}
-          width={600}
-          height={400}
-          className="w-[280px] aspect-[3/2] object-cover rounded-md shrink-0"
-        />
-      )}
-    </Link>
-  );
-}
-
-function PostCardMobile({ fp }: { fp: PostCard }) {
-  return (
-    <Link href={`/posts/${fp.slug}`} className="block group">
-      {fp.coverImage && (
-        <Image
-          src={fp.coverImageThumb || fp.coverImage}
-          alt={fp.title}
-          width={600}
-          height={400}
-          className="w-full aspect-[3/2] object-cover rounded-md"
-        />
-      )}
-      <h3 className="text-xl font-semibold text-brand mt-1">{fp.title}</h3>
-      {fp.description && (
-        <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-          {fp.description}
-        </p>
-      )}
     </Link>
   );
 }
@@ -96,7 +88,6 @@ export function InfinitePostCardList({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const mobileSentinelRef = useRef<HTMLDivElement>(null);
 
   // Use refs to avoid stale closures in the observer callback
   const offsetRef = useRef(initialPosts.length);
@@ -149,7 +140,6 @@ export function InfinitePostCardList({
     );
 
     if (sentinelRef.current) observer.observe(sentinelRef.current);
-    if (mobileSentinelRef.current) observer.observe(mobileSentinelRef.current);
 
     const onScroll = () => {
       const remaining =
@@ -194,28 +184,17 @@ export function InfinitePostCardList({
 
   return (
     <div className={className}>
-      {/* Desktop */}
-      <div className="hidden md:block pl-12">
-        <h2 className="text-[50px] font-semibold text-brand-grey">{title}</h2>
-        <div className="mt-4 space-y-6">
+      <div className="md:pl-12">
+        <h2 className="text-3xl font-semibold text-brand-grey mt-2 md:mt-0 md:text-[50px]">
+          {title}
+        </h2>
+        <div className="mt-3 space-y-4 md:mt-4 md:space-y-6">
           {posts.map((fp) => (
-            <PostCardDesktop key={fp.slug} fp={fp} />
+            <FeedCard key={fp.slug} fp={fp} />
           ))}
         </div>
         {statusMessage}
         <div ref={sentinelRef} aria-hidden="true" className="h-1 w-full" />
-      </div>
-
-      {/* Mobile */}
-      <div className="md:hidden">
-        <h2 className="text-3xl font-semibold text-brand-grey mt-2">{title}</h2>
-        <div className="mt-3 space-y-4">
-          {posts.map((fp) => (
-            <PostCardMobile key={fp.slug} fp={fp} />
-          ))}
-        </div>
-        {statusMessage}
-        <div ref={mobileSentinelRef} aria-hidden="true" className="h-1 w-full" />
       </div>
     </div>
   );

@@ -1,12 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 
 interface PostLink {
   title: string;
   slug: string;
   description: string | null;
-  coverImage?: string | null;
-  coverImageThumb?: string | null;
 }
 
 export function PostLinkList({
@@ -19,62 +16,36 @@ export function PostLinkList({
   readMoreHref?: string;
 }) {
   return (
-    <>
-      {/* Desktop */}
-      <div className="hidden md:block pr-12">
-        <h2 className="text-[35px] font-medium text-brand-grey">{title}</h2>
-        <div className="mt-4 space-y-6">
-          {posts.map((post) => (
-            <div key={post.slug}>
-              <Link
-                href={`/posts/${post.slug}`}
-                className="font-normal text-brand text-[27px] hover:underline"
-              >
-                {post.title}
-              </Link>
-              {post.description && (
-                <p className="text-base text-muted-foreground line-clamp-2 mt-0.5">
-                  {post.description}
-                </p>
-              )}
-            </div>
-          ))}
-          {readMoreHref && (
+    // Desktop right rail. The one caller already wraps this in `hidden
+    // md:block`, so a mobile branch here would be hidden above md by that
+    // wrapper and below md by its own class — dead at every width.
+    <div className="hidden md:block pr-12">
+      <h2 className="text-[35px] font-medium text-brand-grey">{title}</h2>
+      <div className="mt-4 space-y-6">
+        {posts.map((post) => (
+          <div key={post.slug}>
             <Link
-              href={readMoreHref}
-              className="text-brand font-medium hover:underline inline-block"
+              href={`/posts/${post.slug}`}
+              className="font-normal text-brand text-[27px] hover:underline"
             >
-              Read More &gt;
+              {post.title}
             </Link>
-          )}
-        </div>
+            {post.description && (
+              <p className="text-base text-muted-foreground line-clamp-2 mt-0.5">
+                {post.description}
+              </p>
+            )}
+          </div>
+        ))}
+        {readMoreHref && (
+          <Link
+            href={readMoreHref}
+            className="text-brand font-medium hover:underline inline-block"
+          >
+            Read More &gt;
+          </Link>
+        )}
       </div>
-
-      {/* Mobile */}
-      <div className="md:hidden">
-        <h2 className="text-3xl font-semibold text-brand-grey mt-2">{title}</h2>
-        <div className="mt-3 space-y-4">
-          {posts.map((post) => (
-            <Link key={post.slug} href={`/posts/${post.slug}`} className="block group">
-              {post.coverImage && (
-                <Image
-                  src={post.coverImageThumb || post.coverImage}
-                  alt={post.title}
-                  width={600}
-                  height={400}
-                  className="w-full aspect-[3/2] object-cover rounded-md"
-                />
-              )}
-              <h3 className="text-xl font-semibold text-brand mt-1">{post.title}</h3>
-              {post.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-                  {post.description}
-                </p>
-              )}
-            </Link>
-          ))}
-        </div>
-      </div>
-    </>
+    </div>
   );
 }

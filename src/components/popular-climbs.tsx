@@ -66,7 +66,10 @@ export function PopularClimbs({
 
   return (
     <aside className={className}>
-      {/* Desktop right rail */}
+      {/* Desktop right rail. Every caller of this variant already wraps it in
+          `hidden md:block`, so a mobile branch here would sit inside a wrapper
+          that hides it above md and be hidden by its own class below md —
+          dead at every width. Mobile uses the withPhotos variant instead. */}
       <div className="hidden md:block pr-12">
         <h2 className="text-[35px] font-medium text-brand-grey">{title}</h2>
         <div className="mt-4 space-y-6">
@@ -84,23 +87,6 @@ export function PopularClimbs({
                 </p>
               )}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Mobile (text-only) */}
-      <div className="md:hidden">
-        <h2 className="text-3xl font-semibold text-brand-grey mt-2">{title}</h2>
-        <div className="mt-3 space-y-4">
-          {posts.map((post) => (
-            <Link key={post.slug} href={`/posts/${post.slug}`} className="block">
-              <h3 className="text-xl font-semibold text-brand">{post.title}</h3>
-              {post.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-                  {post.description}
-                </p>
-              )}
-            </Link>
           ))}
         </div>
       </div>
