@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { thumbSrcset, THUMB_SIZES } from "@/lib/image-variants";
 
 interface PopularPost {
   title: string;
@@ -36,16 +36,22 @@ export function PopularClimbs({
               className="block group"
             >
               {post.coverImage && (
-                <Image
+                /* eslint-disable-next-line @next/next/no-img-element -- same
+                   pre-generated ladder the feed card uses; full width on
+                   mobile, and on desktop this variant is the Recommended
+                   Climbs rail that the detail layout pins to --featured-w:
+                   280px, so the slot geometry matches exactly. */
+                <img
                   src={post.coverImageThumb || post.coverImage}
+                  {...(post.coverImageThumb && {
+                    srcSet: thumbSrcset(post.coverImageThumb),
+                    sizes: THUMB_SIZES,
+                  })}
                   alt={post.title}
                   width={600}
                   height={400}
-                  // Full width on mobile; on desktop this variant is the
-                  // Recommended Climbs rail, which the detail layout pins to
-                  // --featured-w: 280px. Same slot geometry as the feed card,
-                  // so the same ladder applies.
-                  sizes="(min-width: 768px) 280px, 100vw"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full aspect-[3/2] object-cover rounded-md"
                 />
               )}

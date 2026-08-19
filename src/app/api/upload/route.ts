@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { uploadToR2 } from "@/lib/r2";
 import { jwtVerify } from "jose";
 import sharp from "sharp";
-import { buildImageVariants, COVER_QUALITY } from "@/lib/image-pipeline";
+import {
+  buildImageVariants,
+  buildThumbVariants,
+  shortThumbRungs,
+  COVER_QUALITY,
+} from "@/lib/image-pipeline";
 import { buildSrcset, fullUrl, withSuffix } from "@/lib/image-variants";
 import {
   simplifyGpx,
@@ -94,13 +99,35 @@ export async function POST(request: Request) {
 
     let thumbUrl: string | undefined;
     if (isCover) {
-      const thumbBuffer = await sharp(rawBuffer)
-        .rotate()
-        .resize(800, undefined, { withoutEnlargement: true })
-        .webp({ quality: 85 })
-        .toBuffer();
       const thumbKey = `${prefix}/${id}-thumb.webp`;
-      thumbUrl = await uploadToR2(thumbBuffer, thumbKey, contentType);
+      // The feed card and the Recommended Climbs rail read this ladder
+      // straight from R2 with a derived srcset, so the rungs must match the
+      // widths THUMB_WIDTHS advertises. A source too small to fill one would
+      // put a lie in a `w` descriptor; covers are always well past 1280, so
+      // treat a short rung as a bug rather than papering over it.
+      const thumbVariants = await buildThumbVariants(rawBuffer);
+      const short = shortThumbRungs(thumbVariants);
+      if (short.length > 0) {
+        return NextResponse.json(
+          {
+            error: `Cover is too small for the thumbnail ladder (${short
+              .map((r) => `${r.nominal}w rendered ${r.actual}w`)
+              .join(", ")}). Upload a wider source.`,
+          },
+          { status: 400 },
+        );
+      }
+      // The bare `-thumb.webp` is what coverImageThumb stores and what the
+      // `src` fallback points at; it gets a copy of the top rung, the same
+      // role DEFAULT_WIDTH plays for the inline ladder.
+      const top = thumbVariants[thumbVariants.length - 1];
+      const [bare] = await Promise.all([
+        uploadToR2(top.buffer, thumbKey, contentType),
+        ...thumbVariants.map((v) =>
+          uploadToR2(v.buffer, withSuffix(thumbKey, v.suffix), contentType),
+        ),
+      ]);
+      thumbUrl = bare;
     }
 
     return NextResponse.json({

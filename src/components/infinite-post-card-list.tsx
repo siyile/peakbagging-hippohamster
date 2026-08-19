@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { thumbSrcset, THUMB_SIZES } from "@/lib/image-variants";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 interface PostCard {
@@ -30,18 +30,24 @@ function FeedCard({ fp }: { fp: PostCard }) {
       className="group block md:flex md:items-start md:gap-6"
     >
       {fp.coverImage && (
-        <Image
+        /* eslint-disable-next-line @next/next/no-img-element -- pre-generated
+           thumbnail ladder straight from R2. Routing it through the optimizer
+           only re-encoded an already-sized webp, cost a proxy hop, and billed
+           a transformation per rung. */
+        <img
           src={fp.coverImageThumb || fp.coverImage}
+          {...(fp.coverImageThumb && {
+            srcSet: thumbSrcset(fp.coverImageThumb),
+            sizes: THUMB_SIZES,
+          })}
           alt={fp.title}
+          // Not the file's real aspect — object-cover crops to this box. These
+          // are the figures next/image reserved, so the card holds its space
+          // before loading exactly as it did before.
           width={600}
           height={400}
-          // Without this, next/image emits a DPR ladder (`640w 1x, 1200w 2x`)
-          // off the nominal width and a Retina desktop pulls the 1200 rung for
-          // a 280px slot. Keep `100vw` bare: getWidths only recognises a plain
-          // `NNNvw` token, so wrapping it as `calc(100vw - 2rem)` silently
-          // falls through to the full 15-rung ladder instead of the 8 that a
-          // matched vw unit narrows it to.
-          sizes="(min-width: 768px) 280px, 100vw"
+          loading="lazy"
+          decoding="async"
           // `md:order-last` moves the cover to the right of the text on
           // desktop while keeping the title first in the DOM. `order` is
           // inert in block flow, so mobile still stacks cover-then-title.

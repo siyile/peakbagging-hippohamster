@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { listR2Objects } from "@/lib/r2";
+import { thumbLadderUrls } from "@/lib/image-variants";
 
 export type OrphanObject = {
   key: string;
@@ -96,6 +97,16 @@ export async function collectReferencedKeys(): Promise<Set<string>> {
     if (cover) referenced.add(cover);
     const thumb = extractKeyFromUrl(row.coverImageThumb, bases);
     if (thumb) referenced.add(thumb);
+    // The thumbnail ladder is derived from the bare thumb URL rather than
+    // stored in a column, so reconstruct its rungs here — the same reasoning
+    // as the GPX `-original` sibling below. Miss this and the feed's srcset
+    // becomes 124 deletable orphans.
+    if (row.coverImageThumb) {
+      for (const url of thumbLadderUrls(row.coverImageThumb)) {
+        const key = extractKeyFromUrl(url, bases);
+        if (key) referenced.add(key);
+      }
+    }
     // The cover ladder lives only in these two columns. Without them every
     // -640/-1024/-full derivative scanned as an orphan, and the storage
     // panel's cleanup would have deleted the srcset out from under every

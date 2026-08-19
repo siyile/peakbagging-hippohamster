@@ -27,6 +27,52 @@ export const IMAGE_SIZES =
 export const COVER_SIZES =
   "(min-width: 1400px) 1040px, (min-width: 768px) calc(100vw - 360px), 100vw";
 
+// Feed-card and rail thumbnails. The card is a fixed 280px column on desktop
+// but a full-bleed 100vw block on mobile, so the ladder spans a 280px slot at
+// 1x through a ~400px slot at 3x.
+//
+// It stops at 960 deliberately. A 430 CSS px phone at DPR3 would "want" 1194,
+// but a 1280 rung measures 161KB even at q50 — more than double what the
+// optimizer serves today — to buy the step from 2.2x to 3.2x effective
+// density, which is close to invisible on a photo.
+//
+// 960 is the trade worth making instead: measured across all 31 covers it
+// averages 81.7KB against the 69.9KB a phone pulls today, so ~17% more bytes
+// for 44% more pixels. Desktop is where the real win lands — a 1x display
+// drops from 36.7KB to 16.3KB, because today it has no rung below 640.
+export const THUMB_WIDTHS = [320, 640, 960];
+
+// Unlike the inline ladder there is no bare rung: `-thumb.webp` already exists
+// as the URL stored in coverImageThumb, and it predates this ladder. Leaving
+// it untouched keeps that column valid, keeps it usable as the no-srcset `src`
+// fallback, and means the backfill only ever adds keys — nothing is
+// overwritten, so no CDN cache serves a rung whose width no longer matches its
+// descriptor.
+export function thumbLadderUrls(thumbUrl: string): string[] {
+  return THUMB_WIDTHS.map((w) => withSuffix(thumbUrl, `-${w}`));
+}
+
+/**
+ * srcset for the thumbnail ladder, derived from the stored `-thumb.webp` URL.
+ *
+ * This needs no database column, unlike the cover ladder: every cover source
+ * is at least 1600px wide, so no thumb rung is ever capped by
+ * withoutEnlargement and the nominal widths are always truthful. The backfill
+ * asserts that per image before writing, and refuses any source that would
+ * make a descriptor lie.
+ */
+export function thumbSrcset(thumbUrl: string): string {
+  return THUMB_WIDTHS.map(
+    (w) => `${withSuffix(thumbUrl, `-${w}`)} ${w}w`,
+  ).join(", ");
+}
+
+// Served as a plain <img>, not through next/image, so this can state the real
+// geometry. The bare-`100vw` restriction that applies to a next/image `sizes`
+// prop (its getWidths only recognises an unwrapped NNNvw token) does not apply
+// here — the browser parses this itself.
+export const THUMB_SIZES = "(min-width: 768px) 280px, calc(100vw - 2rem)";
+
 /** Insert a variant suffix before the file extension of a key or URL. */
 export function withSuffix(pathOrUrl: string, suffix: string): string {
   if (!suffix) return pathOrUrl;
