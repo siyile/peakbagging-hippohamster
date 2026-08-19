@@ -23,9 +23,9 @@ export default function AboutPage() {
             <h1 className="text-4xl font-bold text-brand-grey text-center mb-6">About Us</h1>
             <article className="prose dark:prose-invert max-w-none text-black dark:text-white">
               <p>Welcome to Siyi🦛 (Hippo) and Chutang🐹 (Hamster)&rsquo;s alpine adventures!</p>
-              <h3>Why Hippo🦛 and Hamster🐹?</h3>
-              <p>Siyi is the Hippo 🦛 because he drinks milk tea really, really fast. One gulp and it&rsquo;s gone, like a hippo opening its giant mouth.</p>
-              <p>Chutang is the Hamster 🐹 because she always overpacks her food, stuffing away snacks for every trip like a hamster filling its cheeks.</p>
+              <h3>Why Hippo and Hamster?</h3>
+              <p>Siyi is the Hippo because he drinks milk tea really, really fast. One gulp and it&rsquo;s gone, like a hippo opening its giant mouth.</p>
+              <p>Chutang is the Hamster because she always overpacks her food, stuffing away snacks for every trip like a hamster filling its cheeks.</p>
               <h3>Start of Our Journey</h3>
               <p>We moved to the Seattle area at the beginning of 2021 and started hiking and backpacking around the PNW. With the goal of climbing Mount Rainier unguided, we applied for the Mountaineers basic climbing course in 2022. Got rejected lol. So we both took the scramble course in 2022 instead, then basic climbing in 2024, lead on trad in 2025, and winter mountaineering and crevasse rescue in 2026. </p>
               <p>Somewhere along the way we fell in love with the Cascades, from hiking to backpacking, from rock to glacier, and just gradually became outdoor people.</p>
