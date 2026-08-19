@@ -33,6 +33,15 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** Pull just the URLs out of a `url 640w, url 1024w` srcset string. */
+function parseSrcsetUrls(srcset: string | null): string[] {
+  if (!srcset) return [];
+  return srcset
+    .split(",")
+    .map((candidate) => candidate.trim().split(/\s+/)[0])
+    .filter(Boolean);
+}
+
 function extractKeyFromUrl(
   url: string | null,
   bases: string[]
@@ -74,6 +83,8 @@ export async function collectReferencedKeys(): Promise<Set<string>> {
     .select({
       coverImage: posts.coverImage,
       coverImageThumb: posts.coverImageThumb,
+      coverImageSrcset: posts.coverImageSrcset,
+      coverImageFull: posts.coverImageFull,
       gpxUrl: posts.gpxUrl,
       content: posts.content,
     })
@@ -85,6 +96,16 @@ export async function collectReferencedKeys(): Promise<Set<string>> {
     if (cover) referenced.add(cover);
     const thumb = extractKeyFromUrl(row.coverImageThumb, bases);
     if (thumb) referenced.add(thumb);
+    // The cover ladder lives only in these two columns. Without them every
+    // -640/-1024/-full derivative scanned as an orphan, and the storage
+    // panel's cleanup would have deleted the srcset out from under every
+    // post. Additive by nature: widening this set can only spare keys.
+    for (const url of parseSrcsetUrls(row.coverImageSrcset)) {
+      const key = extractKeyFromUrl(url, bases);
+      if (key) referenced.add(key);
+    }
+    const full = extractKeyFromUrl(row.coverImageFull, bases);
+    if (full) referenced.add(full);
     const gpx = extractKeyFromUrl(row.gpxUrl, bases);
     if (gpx) {
       referenced.add(gpx);
