@@ -3,7 +3,7 @@ import { posts } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
-import { InfinitePostCardList } from "@/components/infinite-post-card-list";
+import { PostCardList } from "@/components/post-card-list";
 import { PostLinkList } from "@/components/post-link-list";
 
 export const metadata = {
@@ -20,7 +20,6 @@ export const metadata = {
 // revalidates after bumping viewCount.
 export const revalidate = 3600;
 
-const PAGE_SIZE = 10;
 
 export default async function PostsPage() {
   const [latestPosts, popularPosts] = await Promise.all([
@@ -36,8 +35,7 @@ export default async function PostsPage() {
       })
       .from(posts)
       .where(eq(posts.status, "published"))
-      .orderBy(desc(posts.tripDate))
-      .limit(PAGE_SIZE),
+      .orderBy(desc(posts.tripDate)),
     db
       .select({
         title: posts.title,
@@ -59,12 +57,7 @@ export default async function PostsPage() {
           the divider and right rail. The feed is mounted once — a second copy
           would run its own fetch loop off the shared window scroll. */}
       <div className="grid grid-cols-1 md:grid-cols-[2fr_auto_1fr] gap-4 md:gap-8 md:mt-4 px-4 md:px-0">
-        <InfinitePostCardList
-          title="Latest Climbs"
-          initialPosts={latestPosts}
-          sort="latest"
-          pageSize={PAGE_SIZE}
-        />
+        <PostCardList title="Latest Climbs" posts={latestPosts} />
         <div className="hidden md:block w-px bg-border" />
         <div className="hidden md:block">
           <PostLinkList title="Most Popular" posts={popularPosts} readMoreHref="/" />

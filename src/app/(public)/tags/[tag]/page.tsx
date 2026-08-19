@@ -5,7 +5,7 @@ import { desc, eq, and, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
-import { InfinitePostCardList } from "@/components/infinite-post-card-list";
+import { PostCardList } from "@/components/post-card-list";
 import { PopularClimbs } from "@/components/popular-climbs";
 
 // Tag membership only changes on admin edit, so daily is plenty. Without
@@ -50,7 +50,10 @@ export async function generateMetadata({
   };
 }
 
-const PAGE_SIZE = 10;
+// A tag needs a decent number of posts before a "most popular within this
+// tag" rail says anything useful. Was PAGE_SIZE back when the feed was paged;
+// the threshold is unchanged, the name now says what it is for.
+const MIN_POSTS_FOR_POPULAR_RAIL = 10;
 
 export default async function TagPage({
   params,
@@ -75,8 +78,7 @@ export default async function TagPage({
       .innerJoin(postTags, eq(posts.id, postTags.postId))
       .innerJoin(tags, eq(postTags.tagId, tags.id))
       .where(and(eq(posts.status, "published"), sql`lower(${tags.name}) = ${decoded.toLowerCase()}`))
-      .orderBy(desc(posts.tripDate))
-      .limit(PAGE_SIZE),
+      .orderBy(desc(posts.tripDate)),
     db
       .select({
         title: posts.title,
@@ -99,7 +101,7 @@ export default async function TagPage({
     notFound();
   }
 
-  const showPopular = latestPosts.length >= PAGE_SIZE;
+  const showPopular = latestPosts.length >= MIN_POSTS_FOR_POPULAR_RAIL;
 
   return (
     <div>
@@ -110,13 +112,7 @@ export default async function TagPage({
           the divider and right rail. The feed is mounted once — a second copy
           would run its own fetch loop off the shared window scroll. */}
       <div className="grid grid-cols-1 md:grid-cols-[2fr_auto_1fr] gap-4 md:gap-8 md:mt-4 px-4 md:px-0">
-        <InfinitePostCardList
-          title={`Latest ${decoded} Trips`}
-          initialPosts={latestPosts}
-          sort="latest"
-          tag={decoded}
-          pageSize={PAGE_SIZE}
-        />
+        <PostCardList title={`Latest ${decoded} Trips`} posts={latestPosts} />
         {showPopular && (
           <>
             <div className="hidden md:block w-px bg-border" />

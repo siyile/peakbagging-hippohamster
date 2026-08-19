@@ -3,7 +3,7 @@ import { posts } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
-import { InfinitePostCardList } from "@/components/infinite-post-card-list";
+import { PostCardList } from "@/components/post-card-list";
 import { PopularClimbs } from "@/components/popular-climbs";
 
 export const metadata = {
@@ -23,7 +23,6 @@ export const metadata = {
 // pageview would effectively un-cache it). Hourly is ample for a soft signal.
 export const revalidate = 3600;
 
-const PAGE_SIZE = 10;
 
 export default async function HomePage() {
   const [latestPosts, popularPosts] = await Promise.all([
@@ -39,8 +38,7 @@ export default async function HomePage() {
       })
       .from(posts)
       .where(eq(posts.status, "published"))
-      .orderBy(desc(posts.tripDate))
-      .limit(PAGE_SIZE),
+      .orderBy(desc(posts.tripDate)),
     db
       .select({
         title: posts.title,
@@ -71,12 +69,7 @@ export default async function HomePage() {
           withPhotos
           className="md:hidden"
         />
-        <InfinitePostCardList
-          title="Latest Climbs"
-          initialPosts={latestPosts}
-          sort="latest"
-          pageSize={PAGE_SIZE}
-        />
+        <PostCardList title="Latest Climbs" posts={latestPosts} />
         <div className="hidden md:block w-px bg-border" />
         <PopularClimbs posts={popularPosts} className="hidden md:block" />
       </div>
