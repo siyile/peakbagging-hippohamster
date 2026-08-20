@@ -7,31 +7,15 @@ import { HeroBanner } from "@/components/hero-banner";
 import { NavBar } from "@/components/nav-bar";
 import { PostCardList } from "@/components/post-card-list";
 import { PopularClimbs } from "@/components/popular-climbs";
+import { getCanonicalTagName, getPublishedTagNames } from "@/lib/tags";
 
 // Tag membership only changes on admin edit, so daily is plenty. Without
 // this the page was fully SSR'd (two DB queries) on every hit.
 export const revalidate = 86400;
 
 export async function generateStaticParams() {
-  const rows = await db
-    .select({ name: tags.name })
-    .from(tags)
-    .innerJoin(postTags, eq(tags.id, postTags.tagId))
-    .innerJoin(posts, eq(postTags.postId, posts.id))
-    .where(eq(posts.status, "published"));
-
-  // Lookups below are case-insensitive and some tags differ only by case
-  // (scramble / Scramble), so dedupe to avoid prerendering duplicate pages.
-  const seen = new Set<string>();
-  const params: { tag: string }[] = [];
-  for (const { name } of rows) {
-    const key = name.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      params.push({ tag: name });
-    }
-  }
-  return params;
+  const names = await getPublishedTagNames();
+  return names.map((tag) => ({ tag }));
 }
 
 export async function generateMetadata({
@@ -41,11 +25,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { tag } = await params;
   const decoded = decodeURIComponent(tag);
+
+  // Point at the tag's stored casing, not the casing in the URL — otherwise
+  // /tags/smoot and /tags/Smoot each declare themselves canonical and Google
+  // sees two URLs for one page. A redirect cannot fix this: route matching is
+  // case-insensitive, so /tags/smoot -> /tags/Smoot matches itself and loops.
+  // Falls back to the requested name for an unknown tag, which the page body
+  // 404s anyway.
+  const name = (await getCanonicalTagName(decoded)) ?? decoded;
+
   return {
-    title: decoded,
-    description: `Browse every ${decoded} trip report from the PNW, with detailed route beta, conditions, climb stats, and photos.`,
+    title: name,
+    description: `Browse every ${name} trip report from the PNW, with detailed route beta, conditions, climb stats, and photos.`,
     alternates: {
-      canonical: `/tags/${encodeURIComponent(decoded)}`,
+      canonical: `/tags/${encodeURIComponent(name)}`,
     },
   };
 }
@@ -95,8 +88,14 @@ export default async function TagPage({
       .limit(5),
   ]);
 
-  // A tag with no published posts is a dead end — return a real 404 rather than
-  // a thin 200 page, which Google flags as a soft 404.
+  // A tag with no published posts is a dead end. Note this cannot produce a
+  // real 404 status: loading.tsx wraps the route in Suspense, so the shell has
+  // already flushed 200 by the time this runs and the miss goes out as a soft
+  // 404 (200 + the noindex Next injects on its not-found boundary). Google
+  // honours the noindex, and the sitemap no longer advertises dead tags, so
+  // nothing points here. Raising it in generateMetadata does not help —
+  // metadata streams too. Only deleting every loading.tsx above this route
+  // restores a 404 status, at the cost of the skeletons.
   if (latestPosts.length === 0) {
     notFound();
   }

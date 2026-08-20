@@ -20,13 +20,29 @@ const nextConfig: NextConfig = {
   // bill middleware CPU on every request.
   async redirects() {
     return [
-      // Specific mappings must come before the catch-all below: first match
-      // wins, and the catch-all would otherwise swallow the 18 post entries.
+      // Specific mappings must come before the patterns below: first match
+      // wins, and /posts/:region/:peak or /tags/:tag/page/:n would otherwise
+      // swallow entries that need a named destination.
       ...Object.entries(LEGACY_REDIRECTS).map(([source, destination]) => ({
         source,
         destination: encodePathSegments(destination),
         permanent: true,
       })),
+      // Hugo's paginated and taxonomy URL shapes existed for every tag and
+      // category, so listing them one page at a time left gaps that 404'd
+      // (/page/3, /categories/scramble/page/2). Match the shape instead.
+      // These destinations carry route params, so they skip
+      // encodePathSegments — it would percent-encode the ":" too.
+      { source: "/page/:n", destination: "/posts", permanent: true },
+      { source: "/categories/:category", destination: "/posts", permanent: true },
+      {
+        source: "/categories/:category/page/:n",
+        destination: "/posts",
+        permanent: true,
+      },
+      // Drops the pagination and lets the specific entries above map the tag
+      // name if it needs one.
+      { source: "/tags/:tag/page/:n", destination: "/tags/:tag", permanent: true },
       // Old post URLs always had exactly two segments under /posts; current
       // posts live at /posts/{slug}. Send unmapped stragglers to the index so
       // no old URL hard-404s. Note this shadows any future two-segment route
